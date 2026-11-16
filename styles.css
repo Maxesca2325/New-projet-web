@@ -37,6 +37,8 @@ a { color: var(--color-text-link); }
 .center { text-align: center; }
 .grow { flex: 1; min-height: var(--space-5); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.instr { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-md); font-weight: var(--font-weight-bold); color: var(--color-text-primary); }
+.instr .ic { color: var(--color-accent-primary); }
 .eyebrow {
   display: flex; align-items: center; gap: var(--space-2);
   font-size: var(--font-size-xs); font-weight: var(--font-weight-bold);
@@ -78,7 +80,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .btn.secondary { background: var(--color-accent-secondary); color: var(--color-accent-secondary-text); }
 .btn.ghost { background: transparent; color: var(--color-text-secondary); border: var(--border-width) solid var(--color-border-primary); }
 .btn.danger { background: var(--color-status-error); color: var(--color-bg-secondary); box-shadow: 0 4px 0 color-mix(in srgb, var(--color-status-error) 60%, var(--color-text-primary)); }
-.btn.danger-text { color: var(--color-status-error); }
+.quiet-link { justify-self: center; min-height: var(--touch-min); padding: 0 var(--space-3); background: none; border: 0; color: var(--color-text-secondary); font-size: var(--font-size-sm); text-decoration: underline; text-underline-offset: 3px; }
 .icon-btn { display: inline-grid; place-items: center; width: var(--touch-min); height: var(--touch-min); padding: 0; border: 0; border-radius: var(--border-radius-sm); background: none; color: var(--color-text-secondary); }
 .icon-btn:hover { background: var(--color-accent-secondary); color: var(--color-accent-primary); }
 .mini-say { display: inline-grid; place-items: center; width: var(--touch-min); height: var(--touch-min); border: 0; border-radius: var(--border-radius-sm); background: var(--color-accent-secondary); color: var(--color-accent-primary); flex: none; }
@@ -326,7 +328,7 @@ a.lesson:hover { background: var(--color-bg-secondary); }
 
 /* ---------- overlays ---------- */
 .toast {
-  position: fixed; left: 50%; top: calc(var(--space-4) + env(safe-area-inset-top, 0px)); z-index: 99; transform: translateX(-50%);
+  position: fixed; left: 50%; bottom: calc(var(--tabbar-height) + var(--space-4) + env(safe-area-inset-bottom, 0px)); z-index: 99; transform: translateX(-50%);
   padding: var(--space-3) var(--space-4); border-radius: var(--border-radius-md); background: var(--color-bg-inverse); color: var(--color-text-inverse);
   font-weight: var(--font-weight-bold); white-space: nowrap; animation: up var(--duration-normal) var(--easing-out);
 }

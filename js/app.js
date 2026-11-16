@@ -1,7 +1,7 @@
 import { PATHS, GOALS, GOAL_TO_PATH, LEVELS, MINUTES, LESSONS } from './data.js';
 import * as store from './store.js';
 import { grade, dueIds, MASTERED_BOX } from './srs.js';
-import { say, canSpeak, canListen, listen } from './speech.js';
+import { say, canSpeak, canListen, listen, setAudioIndex, preload, stopSpeaking } from './speech.js';
 import { buildLesson, buildReview } from './lesson.js';
 import { esc, shuffle, pick, typedMatch, spokenScore, norm, words } from './util.js';
 import { SPRITE } from './icons.js';
@@ -35,6 +35,18 @@ const ITEM = new Map(ALL_ITEMS.map((it) => [it.id, it]));
 const LESSON = new Map(LESSONS.map((l) => [l.id, l]));
 const PATH = new Map(PATHS.map((p) => [p.id, p]));
 const lessonOf = (itemId) => LESSON.get(itemId.split('.')[0]);
+// Odyo Kokoro yo: audio/<leson>-<n>.mp3, lis yo nan audio/index.json (scripts/voice_koze.mjs).
+// Nou itilize sèlman fichye ki egziste; sinon se vwa telefòn nan.
+fetch('audio/index.json')
+  .then((r) => (r.ok ? r.json() : {}))
+  .then((idx) => {
+    const files = new Set(Object.keys(idx));
+    setAudioIndex(new Map(ALL_ITEMS
+      .map((it) => [it.en, `${it.id.replace('.', '-')}.mp3`])
+      .filter(([, f]) => files.has(f))
+      .map(([en, f]) => [en, `audio/${f}`])));
+  })
+  .catch(() => {});
 const PRAISE = ['Bravo!', 'Trè byen!', 'Ou fò!', 'Pafè!', 'Kontinye konsa!', 'Se sa!'];
 const COMFORT = ['Pa tout afè!', 'Prèske!', 'Pa gen pwoblèm!'];
 const REVIEW_SIZE = 12;
@@ -148,7 +160,7 @@ window.addEventListener('hashchange', async () => {
     const target = location.hash;
     history.pushState(null, '', session.hash);
     if (await ask('Ou vle kite? Pwogrè sa a ap pèdi.', 'Wi, kite')) {
-      window.speechSynthesis?.cancel();
+      stopSpeaking();
       session = null;
       redirect(target || '#aprann');
     }
@@ -499,7 +511,7 @@ function profileTab() {
       <p class="note ${canSpeak ? 'ok' : ''}">${ic('volume-2')}<span>${canSpeak ? 'Vwa anglè a mache.' : 'Telefòn ou pa ka li fraz anglè yo byen fò. Eseye ak Chrome (Android) oswa Safari (iPhone).'}</span></p>
       <p class="note ${canListen ? 'ok' : ''}">${ic('mic')}<span>${canListen ? 'Egzèsis pale yo mache.' : 'Egzèsis pale yo mache sèlman nan Chrome (Android) ak Safari (iPhone). Ou ka sote yo.'}</span></p>
     </section>
-    <button class="btn ghost danger-text" data-reset>Efase tout pwogrè mwen</button>
+    <button class="quiet-link" data-reset>Efase tout pwogrè mwen</button>
     <p class="foot-note muted small">Koze v0.3 · Tout pwogrè ou rete sou telefòn ou.</p>`, { title: 'Pwofil' });
   $$('[data-edit]').forEach((a) => (a.onclick = () => { draft = null; }));
   $('[data-reset]').onclick = async () => {
@@ -511,12 +523,14 @@ function profileTab() {
 
 function startLesson(lesson) {
   session = { hash: `#leson-${lesson.id}`, back: '#aprann', done: false };
+  preload(lesson.items.map((it) => it.en));
   run({ kind: 'lesson', lesson, steps: buildLesson(lesson, S.profile), items: lesson.items });
 }
 
 function startReview() {
   session = { hash: '#revizyon', back: '#revize', done: false };
   const items = dueNow().slice(0, REVIEW_SIZE).map((id) => ITEM.get(id));
+  preload(items.map((it) => it.en));
   run({ kind: 'review', steps: buildReview(items, S.items), items });
 }
 
@@ -544,7 +558,7 @@ function run({ kind, lesson, steps, items }) {
     </main>`);
     $('[data-quit]').onclick = async () => {
       if (await ask('Ou vle kite? Pwogrè sa a ap pèdi.', 'Wi, kite')) {
-        window.speechSynthesis?.cancel();
+        stopSpeaking();
         session = null;
         redirect(me.back);
       }
@@ -617,7 +631,7 @@ function run({ kind, lesson, steps, items }) {
   // --- Nouvo fraz
   function intro({ item }) {
     frame(`
-      <p class="eyebrow">${ic('sparkles')} Nouvo fraz</p>
+      <p class="instr">${ic('sparkles')} Nouvo fraz</p>
       <div class="card phrase">
         <span class="lang">EN</span>
         <p class="en">${esc(item.en)}</p>
@@ -647,10 +661,10 @@ function run({ kind, lesson, steps, items }) {
     const options = shuffle(opts);
 
     const prompt = {
-      choose_ht: `<p class="eyebrow">Kisa sa vle di?</p>
+      choose_ht: `<p class="instr">Kisa sa vle di?</p>
         <p class="prompt"><span class="lang">EN</span>${esc(item.en)} ${canSpeak ? `<button class="mini-say" data-say aria-label="Koute">${ic('volume-2')}</button>` : ''}</p>`,
-      choose_en: `<p class="eyebrow">Kijan yo di sa an anglè?</p><p class="prompt"><span class="lang kr">KR</span>${esc(item.ht)}</p>`,
-      listen: `<p class="eyebrow">Koute epi chwazi sa ou tande</p>
+      choose_en: `<p class="instr">Kijan yo di sa an anglè?</p><p class="prompt"><span class="lang kr">KR</span>${esc(item.ht)}</p>`,
+      listen: `<p class="instr">Koute epi chwazi sa ou tande.</p>
         <div class="listen-row">
           <button class="big-say" data-say aria-label="Koute">${ic('volume-2')}</button>
           <button class="big-say slow" data-slow aria-label="Koute dousman">${ic('snail')}</button>
@@ -693,7 +707,7 @@ function run({ kind, lesson, steps, items }) {
     const answer = [];
 
     frame(`
-      <p class="eyebrow">Mete mo yo nan lòd</p>
+      <p class="instr">Mete mo yo nan bon lòd.</p>
       <p class="prompt"><span class="lang kr">KR</span>${esc(item.ht)}</p>
       <div class="answer-line" aria-label="Repons ou"></div>
       <div class="bank" aria-label="Mo yo"></div>`, checkBtn());
@@ -716,7 +730,7 @@ function run({ kind, lesson, steps, items }) {
   function type(st) {
     const { item } = st;
     frame(`
-      <p class="eyebrow">Ekri sa an anglè</p>
+      <p class="instr">Ekri fraz sa a an anglè.</p>
       <p class="prompt"><span class="lang kr">KR</span>${esc(item.ht)}</p>
       <label class="sr" for="type-in">Repons ou an anglè</label>
       <textarea id="type-in" class="type-in" rows="2" autocapitalize="sentences" autocomplete="off" autocorrect="off" spellcheck="false"
@@ -739,7 +753,7 @@ function run({ kind, lesson, steps, items }) {
     const { item } = st;
     let tries = 0;
     frame(`
-      <p class="eyebrow">${ic('mic')} Di fraz sa a byen fò</p>
+      <p class="instr">${ic('mic')} Di fraz sa a byen fò.</p>
       <div class="card phrase">
         <p class="en">${esc(item.en)}</p>
         <span class="say-as"><span class="lbl">Di l konsa</span><b>${esc(item.son)}</b></span>

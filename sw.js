@@ -1,10 +1,10 @@
 // Koze mache san entènèt: nou kenbe fichye app la sou telefòn nan.
 // Chanje VERSION chak fwa ou pibliye yon nouvo vèsyon.
-const VERSION = 'koze-v5';
+const VERSION = 'koze-v6';
 const ASSETS = [
   './', './index.html', './tokens.css', './styles.css', './manifest.webmanifest',
   './js/app.js', './js/icons.js', './js/data.js', './js/lesson.js', './js/srs.js', './js/speech.js', './js/store.js', './js/util.js',
-  './icons/icon.svg', './img/maskot.webp', './img/maskot-kontan.webp', './img/maskot-ankouraje.webp', './img/maskot-dodo.webp', './icons/icon-192.png', './icons/icon-512.png',
+  './icons/icon.svg', './audio/index.json', './img/maskot.webp', './img/maskot-kontan.webp', './img/maskot-ankouraje.webp', './img/maskot-dodo.webp', './icons/icon-192.png', './icons/icon-512.png',
   './fonts/bricolage-grotesque.woff2', './fonts/atkinson-400.woff2', './fonts/atkinson-700.woff2',
 ];
 
@@ -28,7 +28,7 @@ self.addEventListener('fetch', (e) => {
     caches.open(VERSION).then(async (cache) => {
       const hit = await cache.match(req, { ignoreSearch: true });
       const net = fetch(req)
-        .then((res) => { if (res.ok) cache.put(req, res.clone()); return res; })
+        .then((res) => { if (res.status === 200) cache.put(req, res.clone()).catch(() => {}); return res; })
         .catch(() => hit || cache.match('./index.html'));
       if (hit) { e.waitUntil(net.catch(() => {})); return hit; }
       return net;
