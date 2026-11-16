@@ -37,3 +37,17 @@ export const yesterdayKey = () => {
   d.setDate(d.getDate() - 1);
   return dayKey(d);
 };
+
+// Leson oswa revizyon ki an kou. Nou mete l nan sessionStorage: li rete la lè moun nan
+// rafrechi paj la, men li efase poukont li lè l fèmen app la (oswa onglet la) → leson an
+// rekòmanse a zewo.
+const RUN_KEY = 'koze.run';
+export function saveRun(run) {
+  try { sessionStorage.setItem(RUN_KEY, JSON.stringify(run)); } catch { /* */ }
+}
+export function loadRun() {
+  try { return JSON.parse(sessionStorage.getItem(RUN_KEY)); } catch { return null; }
+}
+export function clearRun() {
+  try { sessionStorage.removeItem(RUN_KEY); localStorage.removeItem(RUN_KEY); } catch { /* */ }
+}

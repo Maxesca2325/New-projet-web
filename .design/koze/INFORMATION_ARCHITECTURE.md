@@ -125,4 +125,4 @@ App à une seule page (PWA, `index.html`) ; chaque vue a une adresse dans le has
 - Dynamic segments : identifiant de leçon (`#leson-konstriksyon-2`), numéro de question (`#kesyon-3`).
 - Query parameters : aucun en usage normal (`?debug` réservé aux tests).
 - Ouvrir directement `#leson-x` d'une leçon verrouillée → redirige vers `#aprann`.
-- Recharger la page en pleine leçon → retour à `#aprann` (une leçon ne reprend pas au milieu).
+- Recharger la page en pleine leçon ou révision → on revient **au même exercice** (progression, erreurs et XP gardés, sauvegarde en `sessionStorage`). Quitter l'app (fermer l'onglet ou l'app installée) ou répondre « Wi, kite » efface la sauvegarde : la leçon recommence à zéro.

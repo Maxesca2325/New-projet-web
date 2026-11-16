@@ -5,6 +5,7 @@ import { say, canSpeak, canListen, listen, stopListening, setAudioIndex, preload
 import { buildLesson, buildReview } from './lesson.js';
 import { esc, shuffle, pick, typedMatch, spokenMatch, norm, words } from './util.js';
 import { SPRITE } from './icons.js';
+import { sfx, sfxOn, setSfx } from './sfx.js';
 
 document.body.insertAdjacentHTML('afterbegin', SPRITE);
 
@@ -160,7 +161,7 @@ window.addEventListener('hashchange', async () => {
     const target = location.hash;
     history.pushState(null, '', session.hash);
     if (await ask('Ou vle kite? Pwogrè sa a ap pèdi.', 'Wi, kite')) {
-      stopSpeaking(); stopListening();
+      stopSpeaking(); stopListening(); store.clearRun();
       session = null;
       redirect(target || '#aprann');
     }
@@ -183,13 +184,18 @@ function render() {
   if (name === 'kesyon' && +arg >= 1 && +arg <= 4) return setup(+arg);
   if (name === 'leson') {
     const lesson = LESSON.get(arg);
-    if (booting || !lesson || !unlockedSet().has(lesson.id)) return redirect('#aprann');
+    if (!lesson || !unlockedSet().has(lesson.id)) return redirect('#aprann');
     if (session?.hash === h) return;
+    const saved = savedRun(h);
+    if (saved) return startLesson(lesson, saved); // rafrechi oswa retounen: kontinye kote l te ye
+    if (booting) return redirect('#aprann');
     return startLesson(lesson);
   }
   if (name === 'revizyon') {
-    if (booting || !dueNow().length) return redirect('#revize');
     if (session?.hash === h) return;
+    const saved = savedRun(h);
+    if (saved) return startReview(saved);
+    if (booting || !dueNow().length) return redirect('#revize');
     return startReview();
   }
   if (name === 'revize') return reviewTab();
@@ -363,7 +369,12 @@ function learnTab() {
         <h2>${esc(next.tit)}</h2>
         <p class="muted">${esc(next.sitiyasyon)}</p>
         <p class="goal-line">${ic('target')}<span>Apre leson sa a, ou ap ka ${esc(next.objektif)}</span></p>
-        <a class="btn primary big" href="#leson-${next.id}">${ic('play')} Kòmanse leson an</a>
+        ${(() => {
+          const r = savedRun(`#leson-${next.id}`);
+          return r
+            ? `<a class="btn primary big" href="#leson-${next.id}">${ic('play')} Kontinye leson an · ${Math.round((r.pos / r.queue.length) * 100)}%</a>`
+            : `<a class="btn primary big" href="#leson-${next.id}">${ic('play')} Kòmanse leson an</a>`;
+        })()}
       </div>
     </section>` : `
     <section class="next-card">
@@ -509,39 +520,62 @@ function profileTab() {
     <section class="panel device">
       <h2>Telefòn ou</h2>
       <p class="note ${canSpeak ? 'ok' : ''}">${ic('volume-2')}<span>${canSpeak ? 'Vwa anglè a mache.' : 'Telefòn ou pa ka li fraz anglè yo byen fò. Eseye ak Chrome (Android) oswa Safari (iPhone).'}</span></p>
+      <button class="switch" data-sfx role="switch" aria-checked="${sfxOn()}">${ic('volume-2')}<span>Son efè (bon/move repons)</span><b>${sfxOn() ? 'Wi' : 'Non'}</b></button>
       <p class="note ${canListen ? 'ok' : ''}">${ic('mic')}<span>${canListen ? 'Egzèsis pale yo mache.' : 'Egzèsis pale yo mache sèlman nan Chrome (Android) ak Safari (iPhone). Ou ka sote yo.'}</span></p>
     </section>
     <button class="quiet-link" data-reset>Efase tout pwogrè mwen</button>
     <p class="foot-note muted small">Koze v0.3 · Tout pwogrè ou rete sou telefòn ou.</p>`, { title: 'Pwofil' });
   $$('[data-edit]').forEach((a) => (a.onclick = () => { draft = null; }));
+  $('[data-sfx]').onclick = (e) => {
+    const on = !sfxOn();
+    setSfx(on);
+    const b = e.currentTarget;
+    b.setAttribute('aria-checked', String(on));
+    b.querySelector('b').textContent = on ? 'Wi' : 'Non';
+    if (on) sfx('ok');
+  };
   $('[data-reset]').onclick = async () => {
-    if (await ask('Ou sèten? Tout pwogrè ou ap efase.', 'Efase', true)) { S = store.reset(); redirect('#byenvini'); }
+    if (await ask('Ou sèten? Tout pwogrè ou ap efase.', 'Efase', true)) { store.clearRun(); S = store.reset(); redirect('#byenvini'); }
   };
 }
 
 // ================================================================ leson / revizyon
 
-function startLesson(lesson) {
+// Leson ki te an kou (si l koresponn ak adrès la epi tout fraz li yo egziste toujou).
+const deser = (x) => ({ type: x.t, item: x.i ? ITEM.get(x.i) : undefined, lesson: x.l ? LESSON.get(x.l) : undefined, retry: !!x.r });
+function savedRun(hash) {
+  const r = store.loadRun();
+  if (!r || r.hash !== hash) return null;
+  const ok = r.queue.every((x) => (!x.i || ITEM.has(x.i)) && (!x.l || LESSON.has(x.l))) && r.itemIds.every((id) => ITEM.has(id));
+  return ok && r.pos < r.queue.length ? r : null;
+}
+
+function startLesson(lesson, resume = null) {
   session = { hash: `#leson-${lesson.id}`, back: '#aprann', done: false };
   preload(lesson.items.map((it) => it.en));
-  run({ kind: 'lesson', lesson, steps: buildLesson(lesson, S.profile), items: lesson.items });
+  run({ kind: 'lesson', lesson, steps: resume ? resume.queue.map(deser) : buildLesson(lesson, S.profile), items: lesson.items, resume });
 }
 
-function startReview() {
+function startReview(resume = null) {
   session = { hash: '#revizyon', back: '#revize', done: false };
-  const items = dueNow().slice(0, REVIEW_SIZE).map((id) => ITEM.get(id));
+  const items = resume ? resume.itemIds.map((id) => ITEM.get(id)) : dueNow().slice(0, REVIEW_SIZE).map((id) => ITEM.get(id));
   preload(items.map((it) => it.en));
-  run({ kind: 'review', steps: buildReview(items, S.items), items });
+  run({ kind: 'review', steps: resume ? resume.queue.map(deser) : buildReview(items, S.items), items, resume });
 }
 
-function run({ kind, lesson, steps, items }) {
+function run({ kind, lesson, steps, items, resume = null }) {
   const me = session;
   const queue = steps.slice();
-  let pos = 0;
-  let xp = 0;
-  let firstTries = 0;
-  let firstOk = 0;
-  const missed = new Set();
+  let pos = resume?.pos ?? 0;
+  let xp = resume?.xp ?? 0;
+  let firstTries = resume?.firstTries ?? 0;
+  let firstOk = resume?.firstOk ?? 0;
+  const missed = new Set(resume?.missed ?? []);
+  // Sonje kote moun nan ye, pou si l rafrechi paj la.
+  const persist = () => store.saveRun({
+    hash: me.hash, kind, itemIds: items.map((it) => it.id), pos, xp, firstTries, firstOk, missed: [...missed],
+    queue: queue.map((x) => ({ t: x.type, i: x.item?.id, l: x.lesson?.id, r: x.retry ? 1 : 0 })),
+  });
 
   const frame = (body, foot) => {
     const pct = Math.round((pos / queue.length) * 100);
@@ -559,6 +593,7 @@ function run({ kind, lesson, steps, items }) {
     $('[data-quit]').onclick = async () => {
       if (await ask('Ou vle kite? Pwogrè sa a ap pèdi.', 'Wi, kite')) {
         stopSpeaking();
+        store.clearRun();
         session = null;
         redirect(me.back);
       }
@@ -568,6 +603,7 @@ function run({ kind, lesson, steps, items }) {
   const next = () => {
     if (session !== me) return;
     if (pos >= queue.length) return finish();
+    persist();
     const st = queue[pos];
     if (DEBUG) window.__kozeStep = st;
     ({ situation, intro, choose_ht: choice, choose_en: choice, listen: choice, order, type, speak })[st.type](st);
@@ -585,7 +621,8 @@ function run({ kind, lesson, steps, items }) {
       queue.push({ ...st, retry: true }); // fraz ou rate a ap tounen pita
     }
     vibrate(ok ? 25 : [40, 60, 40]);
-    if (ok) say(st.item.en);
+    sfx(ok ? 'ok' : 'bad');
+    if (ok) setTimeout(() => say(st.item.en), 450); // kite son an fini anvan vwa a
     const foot = $('.run-foot');
     foot.innerHTML = `
       <div class="fb ${ok ? 'ok' : 'bad'}">
@@ -679,6 +716,7 @@ function run({ kind, lesson, steps, items }) {
       $$('.opt').forEach((x) => { x.classList.remove('sel'); x.setAttribute('aria-pressed', 'false'); });
       b.classList.add('sel');
       b.setAttribute('aria-pressed', 'true');
+      sfx('tap');
       chosen = options[+b.dataset.i];
       $('[data-check]').disabled = false;
     }));
@@ -715,8 +753,8 @@ function run({ kind, lesson, steps, items }) {
     const draw = () => {
       $('.answer-line').innerHTML = answer.map((t) => `<button class="tile-w" data-a="${t.i}">${esc(t.w)}</button>`).join('');
       $('.bank').innerHTML = tiles.map((t) => `<button class="tile-w ${answer.includes(t) ? 'used' : ''}" data-b="${t.i}" ${answer.includes(t) ? 'disabled aria-hidden="true"' : ''}>${esc(t.w)}</button>`).join('');
-      $$('[data-b]').forEach((b) => (b.onclick = () => { answer.push(tiles.find((t) => t.i === +b.dataset.b)); draw(); }));
-      $$('[data-a]').forEach((b) => (b.onclick = () => { answer.splice(answer.findIndex((t) => t.i === +b.dataset.a), 1); draw(); }));
+      $$('[data-b]').forEach((b) => (b.onclick = () => { sfx('tap'); answer.push(tiles.find((t) => t.i === +b.dataset.b)); draw(); }));
+      $$('[data-a]').forEach((b) => (b.onclick = () => { sfx('tap'); answer.splice(answer.findIndex((t) => t.i === +b.dataset.a), 1); draw(); }));
       $('[data-check]').disabled = answer.length === 0;
     };
     draw();
@@ -798,6 +836,7 @@ function run({ kind, lesson, steps, items }) {
       if (m.score >= 0.6) {
         xp += 10;
         vibrate(25);
+        sfx('ok');
         heard(`<p class="said">${colored}</p>`);
         $('.run-foot').innerHTML = `<div class="fb ok">
           <div class="fb-head">${maskot('kontan', 'fb-maskot')}<div><p class="fb-title">${ic('mic')}${m.score === 1 ? pick(PRAISE) : 'Byen di!'}</p>
@@ -806,6 +845,7 @@ function run({ kind, lesson, steps, items }) {
         $('[data-continue]').onclick = advance;
         $('[data-continue]').focus();
       } else {
+        sfx('bad');
         heard(`<p class="said">${colored}</p>
           <p class="muted small">Nou tande: « ${esc(m.heard)} ». Mo ki an gri yo pa t klè. ${tries < 2 ? 'Koute ankò, epi eseye ankò dousman.' : 'Pa gen pwoblèm: w ap pratike fraz sa a ankò pita.'}</p>`);
         if (tries >= 2) {
@@ -824,6 +864,7 @@ function run({ kind, lesson, steps, items }) {
 
   // --- Fen: fèt
   function finish() {
+    store.clearRun();
     for (const it of items) S.items[it.id] = grade(S.items[it.id], !missed.has(it.id));
     if (kind === 'lesson') S.done[lesson.id] = true;
     xp += kind === 'lesson' ? 20 : 10;
@@ -850,6 +891,7 @@ function run({ kind, lesson, steps, items }) {
       <div class="sticky-foot"><button class="btn primary big" data-home>Kontinye</button></div>
     </main>`);
     vibrate([30, 50, 30, 50, 60]);
+    sfx('done');
     countUp($('[data-count]'), xp);
     const btn = $('[data-home]');
     btn.focus();

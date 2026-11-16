@@ -254,6 +254,11 @@ a.lesson:hover { background: var(--color-bg-secondary); }
 .panel .row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .my-paths { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .my-paths li { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1); border-radius: var(--border-radius-full); background: var(--color-bg-primary); font-weight: var(--font-weight-bold); font-size: var(--font-size-sm); }
+.switch { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--touch-min); padding: 0; background: none; border: 0; text-align: left; font-size: var(--font-size-sm); color: var(--color-text-primary); }
+.switch span { flex: 1; }
+.switch .ic { color: var(--color-accent-primary); }
+.switch b { min-width: 52px; padding: var(--space-1) var(--space-3); border-radius: var(--border-radius-full); text-align: center; background: var(--color-bg-tertiary); color: var(--color-text-secondary); }
+.switch[aria-checked="true"] b { background: var(--color-accent-primary); color: var(--color-text-on-accent); }
 .note { display: flex; align-items: flex-start; gap: var(--space-3); color: var(--color-text-secondary); font-size: var(--font-size-sm); }
 .note .ic { color: var(--color-brand-sun-icon); margin-top: 2px; }
 .note.ok .ic { color: var(--color-status-success); }

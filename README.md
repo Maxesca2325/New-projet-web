@@ -9,6 +9,9 @@ Koze se yon aplikasyon pou ayisyen aprann anglè **an kreyòl**, ak leson ki swi
 - **Bouton retounen Android la mache**: chak ekran gen adrès pa l (`#aprann`, `#revize`, `#leson-sante-1`…); nan mitan yon leson li mande « Ou vle kite? ».
 - **Maskòt la (trogon)** nan 4 pòz: bonjou, kontan, ankouraje, dòmi.
 - Siy « San entènèt », fèt fen leson, vibrasyon.
+- **Son efè** (bon repons, move repons, klik, fen leson) fèt an kòd ak Web Audio; ou ka koupe yo nan Pwofil.
+- **Rafrechi paj la** pa fè w pèdi leson an; **fèmen app la** fè l rekòmanse a zewo.
+- **Mikwofòn nan** aksepte aksan an (mo ki prèske menm, 60 % fraz la), montre sa l tande, epi pa janm bloke w.
 - Dokiman design yo nan `.design/koze/` (brief, achitekti, tokens, travay).
 
 ### Baz la (v0.1)
