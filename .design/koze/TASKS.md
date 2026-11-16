@@ -32,4 +32,4 @@ Stack : HTML + CSS + modules JS sans build (PWA). Écrans en template strings da
 
 ## Review
 
-- [ ] **Design review** : lancer `/design-review` contre le brief (captures dans `.design/koze/screenshots/`), puis passe « Unslop design » (AgentAlley) pour traquer ce qui fait « généré par IA ».
+- [x] **Design review** : lancer `/design-review` contre le brief (captures dans `.design/koze/screenshots/`), puis passe « Unslop design » (AgentAlley) pour traquer ce qui fait « généré par IA ».
