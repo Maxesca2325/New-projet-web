@@ -2,24 +2,30 @@
 
 **Pwojè a deja kreye**: `koze` (`invbburpzbemmrphlouc`, rejyon us-east-1), URL ak kle publishable deja nan `js/config.js`. Rete etap 2 (tab la), 3 (imèl) ak *URL Configuration*.
 
-Koze mache san kont. Lè ou ranpli `js/config.js`, bouton kont yo parèt: moun nan ka
-konekte ak yon **kòd 6 chif pa imèl** epi pwogrè l ap sove nan kont li.
+Koze mache san kont. Avèk yon kont, moun nan konekte ak **imèl + modpas**, epi pwogrè l sove nan kont li.
 
 ## 1. Kreye pwojè a (5 minit)
 1. Ale sou **supabase.com** → *Start your project* → konekte (GitHub oswa imèl).
 2. **New project**: non `koze`, chwazi yon modpas pou baz done a (kenbe l pou ou), rejyon **East US** (pi pre Ayiti ak dyaspora a), plan **Free**.
 
-## 2. Kreye tab la
-*SQL Editor* → *New query* → kole tout [`migrations/0001_progress.sql`](migrations/0001_progress.sql) → **Run**.
+## 2. Kreye tab la ak fonksyon an
+*SQL Editor* → *New query* → kole epi **Run**, youn apre lòt:
+- [`migrations/0001_progress.sql`](migrations/0001_progress.sql): tab pwogrè a, ak RLS (chak moun wè pa l sèlman).
+- [`migrations/0002_delete_account.sql`](migrations/0002_delete_account.sql): pou moun nan ka efase kont li nèt (Pwofil → Efase kont mwen).
 
-## 3. Imèl ak lyen (pa gen anyen pou chanje)
-Koze sèvi ak imèl Supabase pa defo a: li gen yon **lyen** (« Confirm your mail » pou yon nouvo kont, « Log In » pou yon kont ki egziste). Moun nan peze lyen an sou menm telefòn nan, epi Koze louvri ak li konekte.
+## 3. Règ sekirite pou modpas yo (Dashboard)
+*Authentication* → *Sign In / Providers* → **Email**:
+- **Confirm email**: ON (moun nan dwe peze lyen nan imèl la anvan l konekte).
+- **Secure email change**: ON.
+- **Minimum password length**: `8`.
+- **Password requirements**: *Letters and digits*.
+- **Prevent use of leaked passwords**: ON si plan an pèmèt li (Pro).
 
-Sèl bagay pou regle: *Authentication* → *URL Configuration*: **Site URL** = `https://maxesca2325.github.io/New-projet-web/`, epi ajoute menm adrès la nan **Redirect URLs**.
+*Authentication* → *URL Configuration*: **Site URL** = `https://maxesca2325.github.io/New-projet-web/`, epi ajoute menm adrès la nan **Redirect URLs** (lyen konfimasyon ak « Reset Password » yo retounen la).
 
-Si yon jou ou ka modifye templates yo (pa egzanp apre w konekte yon SMTP tankou Resend), mete `{{ .Token }}` nan kò **Magic Link** ak **Confirm signup**: Koze aksepte kòd 6 chif la tou (seksyon « Imèl la gen yon kòd 6 chif? »).
-
-> Plan gratis la voye sèlman kèk imèl pa èdtan. Pou lanse pou anpil moun, konekte yon sèvis imèl (SMTP, pa egzanp Resend) nan *Authentication* → *Emails* → *SMTP Settings*.
+> Imèl pa defo yo an anglè: « Confirm your mail » (nouvo kont) ak « Reset Password » (bliye modpas). Koze eksplike moun nan ki bouton pou l peze.
+> Plan gratis la voye sèlman kèk imèl pa èdtan. Anvan lanse pou anpil moun, konekte yon sèvis imèl (SMTP, pa egzanp Resend) nan *Authentication* → *Emails* → *SMTP Settings*: sa pèmèt plis imèl, epi imèl an kreyòl.
+> Pita, pou bloke robo: *Authentication* → *Attack Protection* → CAPTCHA (Cloudflare Turnstile, gratis).
 
 ## 4. Konekte Koze ak pwojè a
 *Project Settings* → *API*: kopye **Project URL** ak kle **anon public**, epi mete yo nan `js/config.js`:
@@ -35,6 +41,8 @@ Kle *anon* a fèt pou l piblik nan navigatè a: se règ RLS tab la ki pwoteje do
 Apre sa, mete `GOOGLE_LOGIN = true` nan `js/config.js`.
 
 ## Kijan sa mache nan kòd la
-- `js/cloud.js`: koneksyon (kòd pa imèl, Google), sesyon ki renouvle poukont li, li/ekri tab `progress` (fetch sèlman, san bibliyotèk).
+- `js/cloud.js`: kreye kont, konekte, bliye/chanje modpas, efase kont (imèl + modpas, Google), règ modpas, limit esè sou telefòn nan, sesyon ki renouvle poukont li, li/ekri tab `progress` (fetch sèlman, san bibliyotèk).
+- `js/pages.js`: FAQ, Règ konfidansyalite, Kondisyon itilizasyon. Mete `CONTACT_EMAIL` nan `js/config.js`.
+- `index.html`: *Content-Security-Policy* (navigatè a refize kòd ak koneksyon ki pa soti nan Koze oswa Supabase).
 - `js/store.js` → `merge()`: mete pwogrè de aparèy ansanm san pèdi anyen.
 - Senkronizasyon: lè app la louvri, apre chak leson/revizyon, lè entènèt la tounen, ak bouton « Sove kounye a » nan Pwofil.

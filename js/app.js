@@ -7,6 +7,7 @@ import { esc, shuffle, pick, typedMatch, spokenMatch, norm, words } from './util
 import { SPRITE } from './icons.js';
 import { sfx, sfxOn, setSfx } from './sfx.js';
 import * as cloud from './cloud.js';
+import { PAGES } from './pages.js';
 const oauthHash = cloud.grabOAuthHash(); // avan routeur la wè #access_token
 
 document.body.insertAdjacentHTML('afterbegin', SPRITE);
@@ -181,7 +182,14 @@ function render() {
   const [name, ...rest] = h.slice(1).split('-');
   const arg = rest.join('-');
 
-  if (name === 'kont' && cloud.cloudReady) return accountScreen();
+  if (PAGES[name] && !arg) return infoScreen(name);
+  if (cloud.cloudReady) {
+    if (h === '#kont') return signupScreen();
+    if (h === '#konekte') return loginScreen();
+    if (h === '#bliye-modpas') return forgotScreen();
+    if (h === '#modpas') return passwordScreen();
+    if (h === '#efase-kont') return deleteAccountScreen();
+  }
   if (!S.profile) {
     if (name === 'kesyon' && +arg >= 1 && +arg <= 4) return setup(+arg);
     if (h !== '#byenvini') return redirect('#byenvini');
@@ -267,7 +275,8 @@ function welcome() {
     </ul>
     <div class="grow"></div>
     <div class="sticky-foot"><button class="btn primary big" data-go>Kòmanse, se gratis</button>
-      ${cloud.cloudReady ? '<a class="quiet-link center-link" href="#kont">Mwen gen yon kont deja</a>' : ''}</div>
+      ${cloud.cloudReady ? '<a class="quiet-link center-link" href="#konekte">Mwen gen yon kont deja</a>' : ''}
+      <p class="legal-foot"><a href="#faq">Kesyon</a> · <a href="#konfidansyalite">Konfidansyalite</a> · <a href="#kondisyon">Kondisyon</a></p></div>
   </main>`);
   $('[data-say]')?.addEventListener('click', () => say('Thank you very much.'));
   $('[data-go]').onclick = () => { draft = null; go('#kesyon-1'); };
@@ -531,8 +540,16 @@ function profileTab() {
       <p class="note ${canListen ? 'ok' : ''}">${ic('mic')}<span>${canListen ? 'Egzèsis pale yo mache.' : 'Egzèsis pale yo mache sèlman nan Chrome (Android) ak Safari (iPhone). Ou ka sote yo.'}</span></p>
     </section>
     ${cloud.cloudReady ? accountPanel() : ''}
+    <section class="panel">
+      <h2>Èd ak enfòmasyon</h2>
+      <ul class="link-list">
+        <li><a href="#faq">${ic('circle-help')}<span>Kesyon moun poze</span>${ic('chevron-right')}</a></li>
+        <li><a href="#konfidansyalite">${ic('shield-check')}<span>Règ konfidansyalite</span>${ic('chevron-right')}</a></li>
+        <li><a href="#kondisyon">${ic('file-text')}<span>Kondisyon itilizasyon</span>${ic('chevron-right')}</a></li>
+      </ul>
+    </section>
     <button class="quiet-link" data-reset>Efase tout pwogrè mwen</button>
-    <p class="foot-note muted small">Koze v0.5 · ${cloud.currentUser() ? 'Pwogrè ou sove nan kont ou.' : 'Tout pwogrè ou rete sou telefòn ou.'}</p>`, { title: 'Pwofil' });
+    <p class="foot-note muted small">Koze v0.6 · ${cloud.currentUser() ? 'Pwogrè ou sove nan kont ou.' : 'Tout pwogrè ou rete sou telefòn ou.'}</p>`, { title: 'Pwofil' });
   $$('[data-edit]').forEach((a) => (a.onclick = () => { draft = null; }));
   $('[data-sfx]').onclick = (e) => {
     const on = !sfxOn();
@@ -562,7 +579,8 @@ async function authReturn(hash) {
   if (!hash) return false;
   const back = await cloud.takeOAuthRedirect(hash);
   if (back === 'error') { toast('Lyen sa a ekspire oswa li deja sèvi. Mande yon nouvo lyen.'); redirect('#kont'); return true; }
-  if (back) { await sync({ force: true }); toast('Ou konekte. Pwogrè ou sove.'); redirect(S.profile ? '#pwofil' : '#byenvini'); return true; }
+  if (back === 'recovery') { recovering = true; redirect('#modpas'); return true; }
+  if (back) { await sync({ force: true }); toast(back === 'signup' ? 'Imèl ou konfime. Pwogrè ou sove.' : 'Ou konekte. Pwogrè ou sove.'); redirect(S.profile ? '#pwofil' : '#byenvini'); return true; }
   return false;
 }
 
@@ -606,84 +624,273 @@ function accountPanel() {
         <button class="btn secondary" data-sync>${ic('refresh-cw')} Sove kounye a</button>
         <button class="btn ghost" data-signout>Dekonekte</button>
       </div>
+      <ul class="link-list">
+        <li><a href="#modpas">${ic('key-round')}<span>Chanje modpas</span>${ic('chevron-right')}</a></li>
+        <li><a href="#efase-kont" class="danger-link">${ic('trash-2')}<span>Efase kont mwen</span>${ic('chevron-right')}</a></li>
+      </ul>
     </section>` : `
     <section class="panel">
       <h2>Kont ou</h2>
       <p class="muted">Kreye yon kont gratis pou w pa pèdi pwogrè ou si w chanje telefòn, epi pou w aprann sou plizyè aparèy.</p>
-      <div class="row"><a class="btn secondary" href="#kont">Kreye kont oswa konekte</a></div>
+      <div class="row"><a class="btn secondary" href="#kont">Kreye kont</a><a class="btn ghost" href="#konekte">Konekte</a></div>
     </section>`;
 }
 
-// Ekran konekte: 1) imèl  2) kòd 6 chif ki rive pa imèl.
-function accountScreen(step = 'email', email = '') {
-  if (cloud.currentUser()) return redirect(S.profile ? '#pwofil' : '#byenvini');
-  const back = () => (history.length > 1 ? history.back() : redirect(S.profile ? '#pwofil' : '#byenvini'));
-  view(`
+// ---------------------------------------------------------------- ekran kont yo
+// #kont (kreye kont) · #konekte · #bliye-modpas · #modpas (chanje) · #efase-kont
+let lastEmail = ''; // imèl moun nan te tape a, pou l pa tape l de fwa
+let recovering = false; // moun nan sot peze lyen « Reset Password » la: li pa bezwen ansyen modpas la
+const homeHash = () => (S.profile ? '#pwofil' : '#byenvini');
+const goBack = () => (history.length > 1 ? history.back() : redirect(homeHash()));
+
+const pwField = (id, label, auto, rules = false) => `
+  <label for="${id}">${label}</label>
+  <div class="pw">
+    <input id="${id}" name="${id}" type="password" autocomplete="${auto}" autocapitalize="off" spellcheck="false" required
+      minlength="${cloud.PW_MIN}" maxlength="${cloud.PW_MAX}" ${rules ? `aria-describedby="${id}-rules"` : ''}>
+    <button type="button" class="pw-eye" data-eye="${id}" aria-label="Montre modpas la" aria-pressed="false">${ic('eye')}</button>
+  </div>
+  ${rules ? `<ul class="pw-rules" id="${id}-rules">
+    <li data-r="len">${ic('check')}<span>Omwen ${cloud.PW_MIN} karaktè</span></li>
+    <li data-r="mix">${ic('check')}<span>Lèt ak chif</span></li>
+    <li data-r="safe">${ic('check')}<span>Pa fasil pou devine (pa « 12345678 », pa non imèl ou)</span></li>
+  </ul>` : ''}`;
+const emailField = (email = '') => `
+  <label for="acct-email">Imèl ou</label>
+  <input id="acct-email" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" required placeholder="egzanp@gmail.com" value="${esc(email)}">`;
+const legalLine = (what) => `<p class="muted small legal">${what} <a href="#kondisyon">Kondisyon yo</a> ak <a href="#konfidansyalite">Règ konfidansyalite a</a>.</p>`;
+const authTabs = (on) => `
+  <nav class="seg" aria-label="Kont">
+    <a href="#kont" ${on === 'kont' ? 'aria-current="page"' : ''}>Kreye kont</a>
+    <a href="#konekte" ${on === 'konekte' ? 'aria-current="page"' : ''}>Konekte</a>
+  </nav>`;
+const authPage = (body) => view(`
   <main class="screen setup account">
     <div class="run-top"><button class="icon-btn" data-back aria-label="Retounen">${ic('arrow-left', 'lg')}</button></div>
-    ${step === 'email' ? `
-      <h1>Kont Koze ou</h1>
-      <p class="muted">Ekri imèl ou. N ap voye yon lyen ba ou: ou peze l, epi ou konekte. Pa gen modpas pou w sonje.</p>
-      <form class="acct-form" data-form novalidate>
-        <label for="acct-email">Imèl ou</label>
-        <input id="acct-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required placeholder="egzanp@gmail.com" value="${esc(email)}">
-        <p class="form-err" role="alert" aria-live="polite"></p>
-        <button class="btn primary big" type="submit">Voye lyen an</button>
-      </form>
-      ${cloud.googleReady ? `<p class="or">oswa</p><a class="btn ghost big" href="${esc(cloud.googleUrl())}">Kontinye ak Google</a>` : ''}
-      <p class="muted small">Kont lan gratis. Nou sèvi ak imèl ou sèlman pou konekte w ak sove pwogrè ou.</p>` : `
-      <h1>Gade imèl ou</h1>
-      <ol class="steps">
-        <li>Louvri imèl nou voye bay <b translate="no">${esc(email)}</b> <b>sou telefòn sa a</b>.</li>
-        <li>Peze lyen <b translate="no" lang="en">« Confirm your mail »</b> oswa <b translate="no" lang="en">« Log In »</b> ki ladan l.</li>
-        <li>Koze ap louvri epi w ap konekte.</li>
-      </ol>
-      <p class="muted small">Ou pa wè imèl la? Gade nan « Spam » oswa « Promosyon ». Li ka pran 1 minit.</p>
-      <details class="code-alt">
-        <summary>Imèl la gen yon kòd 6 chif?</summary>
-        <form class="acct-form" data-form novalidate>
-          <label for="acct-code">Kòd 6 chif la</label>
-          <input id="acct-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required class="code-in">
-          <p class="form-err" role="alert" aria-live="polite"></p>
-          <button class="btn primary big" type="submit">Konekte</button>
-        </form>
-      </details>
-      <div class="row center-row"><button class="quiet-link" data-resend>Voye yon lòt kòd</button><button class="quiet-link" data-change>Chanje imèl</button></div>`}
+    ${body}
   </main>`);
-  $('[data-back]').onclick = back;
+const validEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+
+// Zouti fòm: mesaj erè, bouton okipe, je modpas, règ modpas yo an dirèk.
+function wireForm(onSubmit) {
+  $('[data-back]').onclick = goBack;
   const form = $('[data-form]');
-  const err = (t) => { $('.form-err').textContent = t; };
-  const busy = (on, label) => { const b = form.querySelector('[type=submit]'); b.disabled = on; if (label) b.textContent = label; };
-  if (step === 'email') {
-    const inp = $('#acct-email');
-    inp.focus();
-    inp.oninput = () => err('');
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      const v = inp.value.trim().toLowerCase();
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { err('Adrès imèl sa a pa bon. Tcheke l epi eseye ankò.'); inp.focus(); return; }
-      busy(true, 'N ap voye lyen an…');
-      try { await cloud.sendCode(v); accountScreen('code', v); } catch (x) { err(cloud.errorText(x)); busy(false, 'Voye lyen an'); }
-    };
-  } else {
-    const inp = $('#acct-code');
-    inp.focus();
-    inp.oninput = () => { err(''); inp.value = inp.value.replace(/\D/g, '').slice(0, 6); if (inp.value.length === 6) form.requestSubmit(); };
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      if (inp.value.length !== 6) { err('Kòd la gen 6 chif.'); return; }
-      busy(true, 'N ap konekte w…');
-      try {
-        await cloud.verifyCode(email, inp.value);
-        await sync({ force: true });
-        sfx('ok');
-        toast('Ou konekte. Pwogrè ou sove.');
-        redirect(S.profile ? '#pwofil' : '#byenvini');
-      } catch (x) { err(cloud.errorText(x)); busy(false, 'Konekte'); inp.select(); }
-    };
-    $('[data-resend]').onclick = async () => { try { await cloud.sendCode(email); toast('Nou voye yon nouvo kòd.'); } catch (x) { err(cloud.errorText(x)); } };
-    $('[data-change]').onclick = () => accountScreen('email', email);
-  }
+  const errEl = $('.form-err');
+  const btn = form.querySelector('[type=submit]');
+  const label = btn.textContent;
+  const err = (t) => { errEl.textContent = t; };
+  $$('[data-eye]').forEach((b) => (b.onclick = () => {
+    const inp = $('#' + b.dataset.eye);
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    b.setAttribute('aria-pressed', String(show));
+    b.setAttribute('aria-label', show ? 'Kache modpas la' : 'Montre modpas la');
+    b.innerHTML = ic(show ? 'eye-off' : 'eye');
+  }));
+  const rules = $('.pw-rules');
+  const live = () => {
+    err('');
+    if (!rules) return;
+    const r = cloud.passwordRules($('#' + rules.id.replace('-rules', '')).value, $('#acct-email')?.value || cloud.currentUser()?.email || '');
+    for (const li of rules.children) li.classList.toggle('ok', r[li.dataset.r]);
+  };
+  form.addEventListener('input', live);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.textContent = 'Tann yon ti moman…';
+    try { await onSubmit({ err, form }); } catch (x) { err(cloud.errorText(x)); }
+    if (btn.isConnected) { btn.disabled = false; btn.textContent = label; }
+  };
+  return { err };
+}
+
+async function signedIn(msg) {
+  recovering = false;
+  await sync({ force: true });
+  sfx('ok');
+  toast(msg);
+  redirect(homeHash());
+}
+
+function signupScreen() {
+  if (cloud.currentUser()) return redirect(homeHash());
+  authPage(`
+    ${authTabs('kont')}
+    <h1>Kreye kont Koze ou</h1>
+    <p class="muted">Gratis. Pwogrè ou ap sove: ou p ap pèdi l si w chanje telefòn.</p>
+    <form class="acct-form" data-form novalidate>
+      ${emailField()}
+      ${pwField('acct-pw', 'Chwazi yon modpas', 'new-password', true)}
+      <label class="agree"><input type="checkbox" id="acct-agree" required>
+        <span>Mwen gen omwen 13 an, epi mwen dakò ak <a href="#kondisyon">Kondisyon yo</a> ak <a href="#konfidansyalite">Règ konfidansyalite a</a>.</span></label>
+      <p class="form-err" role="alert" aria-live="polite"></p>
+      <button class="btn primary big" type="submit">Kreye kont mwen</button>
+    </form>
+    ${cloud.googleReady ? `<p class="or">oswa</p><a class="btn ghost big" href="${esc(cloud.googleUrl())}">Kontinye ak Google</a>` : ''}
+    <a class="quiet-link center-link" href="#konekte">Mwen gen yon kont deja</a>`);
+  $('#acct-email').focus();
+  wireForm(async ({ err }) => {
+    const email = $('#acct-email').value.trim().toLowerCase();
+    const pw = $('#acct-pw').value;
+    if (!validEmail(email)) { err('Adrès imèl sa a pa bon. Tcheke l epi eseye ankò.'); return $('#acct-email').focus(); }
+    const r = cloud.passwordRules(pw, email);
+    if (!r.ok) { err(!r.len ? `Modpas la dwe gen omwen ${cloud.PW_MIN} karaktè.` : !r.mix ? 'Mete lèt ak chif nan modpas la.' : 'Modpas sa a twò fasil pou devine. Chwazi yon lòt.'); return $('#acct-pw').focus(); }
+    if (!$('#acct-agree').checked) { err('Tcheke kare a pou w dakò ak kondisyon yo.'); return $('#acct-agree').focus(); }
+    const res = await cloud.signUp(email, pw);
+    if (res === 'session') return signedIn('Kont ou kreye. Pwogrè ou sove.');
+    checkEmailScreen('confirm', email);
+  });
+}
+
+function loginScreen(email = lastEmail) {
+  if (cloud.currentUser()) return redirect(homeHash());
+  authPage(`
+    ${authTabs('konekte')}
+    <h1>Konekte</h1>
+    <form class="acct-form" data-form novalidate>
+      ${emailField(email)}
+      ${pwField('acct-pw', 'Modpas', 'current-password')}
+      <a class="quiet-link forgot" href="#bliye-modpas">Ou bliye modpas ou?</a>
+      <p class="form-err" role="alert" aria-live="polite"></p>
+      <button class="btn primary big" type="submit">Konekte</button>
+    </form>
+    ${cloud.googleReady ? `<p class="or">oswa</p><a class="btn ghost big" href="${esc(cloud.googleUrl())}">Kontinye ak Google</a>` : ''}
+    <a class="quiet-link center-link" href="#kont">Mwen poko gen kont</a>`);
+  (email ? $('#acct-pw') : $('#acct-email')).focus();
+  $('.forgot').onclick = () => { lastEmail = $('#acct-email').value.trim(); };
+  wireForm(async ({ err }) => {
+    const em = $('#acct-email').value.trim().toLowerCase();
+    if (!validEmail(em)) { err('Adrès imèl sa a pa bon. Tcheke l epi eseye ankò.'); return $('#acct-email').focus(); }
+    if (!$('#acct-pw').value) { err('Ekri modpas ou.'); return $('#acct-pw').focus(); }
+    try {
+      await cloud.signIn(em, $('#acct-pw').value);
+    } catch (x) {
+      if (/email_not_confirmed|not confirmed/i.test(`${x.code} ${x.message}`)) return checkEmailScreen('confirm', em, true);
+      $('#acct-pw').select();
+      throw x;
+    }
+    await signedIn('Ou konekte. Pwogrè ou sove.');
+  });
+}
+
+function forgotScreen() {
+  authPage(`
+    <h1>Ou bliye modpas ou?</h1>
+    <p class="muted">Ekri imèl kont ou. N ap voye yon lyen pou w chwazi yon nouvo modpas.</p>
+    <form class="acct-form" data-form novalidate>
+      ${emailField(lastEmail)}
+      <p class="form-err" role="alert" aria-live="polite"></p>
+      <button class="btn primary big" type="submit">Voye lyen an</button>
+    </form>`);
+  $('#acct-email').focus();
+  wireForm(async ({ err }) => {
+    const email = $('#acct-email').value.trim().toLowerCase();
+    if (!validEmail(email)) { err('Adrès imèl sa a pa bon. Tcheke l epi eseye ankò.'); return $('#acct-email').focus(); }
+    await cloud.sendReset(email);
+    lastEmail = email;
+    checkEmailScreen('reset', email);
+  });
+}
+
+// « Gade imèl ou »: apre kreye kont (konfime) oswa bliye modpas (reset).
+function checkEmailScreen(kind, email, notConfirmed = false) {
+  const link = kind === 'reset' ? 'Reset Password' : 'Confirm your mail';
+  authPage(`
+    <h1>Gade imèl ou</h1>
+    ${notConfirmed ? '<p class="note">Ou poko konfime imèl ou. Peze lyen nou te voye a, oswa mande yon lòt anba a.</p>' : ''}
+    <ol class="steps">
+      <li>Louvri imèl nou voye bay <b translate="no">${esc(email)}</b> <b>sou telefòn sa a</b>.</li>
+      <li>Peze lyen <b translate="no" lang="en">« ${link} »</b> ki ladan l.</li>
+      <li>${kind === 'reset' ? 'Koze ap louvri pou w chwazi yon nouvo modpas.' : 'Koze ap louvri epi w ap konekte.'}</li>
+    </ol>
+    <p class="muted small">Ou pa wè imèl la? Gade nan « Spam » oswa « Promosyon ». Li ka pran 1 minit. Lyen an mache yon sèl fwa.</p>
+    <p class="form-err" role="alert" aria-live="polite"></p>
+    <div class="row center-row"><button class="quiet-link" data-resend>Voye imèl la ankò</button><a class="quiet-link" href="#konekte">Retounen nan Konekte</a></div>`);
+  $('[data-back]').onclick = goBack;
+  $('[data-resend]').onclick = async (e) => {
+    const b = e.currentTarget;
+    b.disabled = true;
+    try { await (kind === 'reset' ? cloud.sendReset(email) : cloud.resendConfirm(email)); toast('Nou voye imèl la ankò.'); }
+    catch (x) { $('.form-err').textContent = cloud.errorText(x); }
+    setTimeout(() => { if (b.isConnected) b.disabled = false; }, 30_000); // pa voye 10 imèl youn dèyè lòt
+  };
+}
+
+function passwordScreen() {
+  if (!cloud.currentUser()) return redirect('#konekte');
+  const needOld = !recovering;
+  authPage(`
+    <h1>${needOld ? 'Chanje modpas ou' : 'Chwazi yon nouvo modpas'}</h1>
+    <form class="acct-form" data-form novalidate>
+      <input type="email" autocomplete="username" value="${esc(cloud.currentUser().email)}" hidden>
+      ${needOld ? pwField('acct-old', 'Modpas ou genyen kounye a', 'current-password') : ''}
+      ${pwField('acct-pw', 'Nouvo modpas', 'new-password', true)}
+      <p class="form-err" role="alert" aria-live="polite"></p>
+      <button class="btn primary big" type="submit">Sove nouvo modpas la</button>
+    </form>`);
+  $(needOld ? '#acct-old' : '#acct-pw').focus();
+  wireForm(async ({ err }) => {
+    const pw = $('#acct-pw').value;
+    const r = cloud.passwordRules(pw, cloud.currentUser().email);
+    if (!r.ok) { err(!r.len ? `Modpas la dwe gen omwen ${cloud.PW_MIN} karaktè.` : !r.mix ? 'Mete lèt ak chif nan modpas la.' : 'Modpas sa a twò fasil pou devine. Chwazi yon lòt.'); return $('#acct-pw').focus(); }
+    if (needOld) {
+      if (!$('#acct-old').value) { err('Ekri modpas ou genyen kounye a.'); return $('#acct-old').focus(); }
+      try { await cloud.checkPassword($('#acct-old').value); } catch (x) {
+        $('#acct-old').select();
+        if (x.status === 400) { err('Modpas ou genyen kounye a pa bon.'); return; }
+        throw x;
+      }
+    }
+    await cloud.setPassword(pw);
+    recovering = false;
+    sfx('ok');
+    toast('Nouvo modpas ou sove.');
+    redirect(homeHash());
+  });
+}
+
+function deleteAccountScreen() {
+  if (!cloud.currentUser()) return redirect('#konekte');
+  authPage(`
+    <h1>Efase kont ou</h1>
+    <p>Kont <b translate="no">${esc(cloud.currentUser().email)}</b> ak tout pwogrè ki sove ladan l ap efase <b>nèt</b>. Ou p ap ka jwenn yo ankò.</p>
+    <p class="muted">Pwogrè ki sou telefòn sa a ap rete, men l p ap sove okenn kote ankò.</p>
+    <form class="acct-form" data-form novalidate>
+      <input type="email" autocomplete="username" value="${esc(cloud.currentUser().email)}" hidden>
+      ${pwField('acct-pw', 'Ekri modpas ou pou konfime', 'current-password')}
+      <p class="form-err" role="alert" aria-live="polite"></p>
+      <button class="btn danger big" type="submit">${ic('trash-2')} Efase kont mwen nèt</button>
+    </form>`);
+  $('#acct-pw').focus();
+  wireForm(async ({ err }) => {
+    if (!$('#acct-pw').value) { err('Ekri modpas ou.'); return $('#acct-pw').focus(); }
+    try { await cloud.checkPassword($('#acct-pw').value); } catch (x) {
+      $('#acct-pw').select();
+      if (x.status === 400) { err('Modpas la pa bon.'); return; }
+      throw x;
+    }
+    await cloud.deleteAccount();
+    try { localStorage.removeItem('koze.synced'); localStorage.removeItem('koze.offered'); } catch { /* */ }
+    toast('Kont ou efase.');
+    redirect(homeHash());
+  });
+}
+
+// FAQ, Konfidansyalite, Kondisyon.
+function infoScreen(id) {
+  const p = PAGES[id];
+  view(`
+  <main class="screen info">
+    <div class="run-top"><button class="icon-btn" data-back aria-label="Retounen">${ic('arrow-left', 'lg')}</button></div>
+    <h1>${p.title}</h1>
+    <article class="prose">${p.body()}</article>
+    <nav class="info-links" aria-label="Lòt paj">
+      ${Object.entries(PAGES).filter(([k]) => k !== id).map(([k, x]) => `<a href="#${k}">${x.title}${ic('chevron-right')}</a>`).join('')}
+    </nav>
+  </main>`);
+  $('[data-back]').onclick = goBack;
 }
 
 // ================================================================ leson / revizyon

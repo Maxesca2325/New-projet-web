@@ -6,3 +6,5 @@ export const SUPABASE_URL = 'https://invbburpzbemmrphlouc.supabase.co';
 export const SUPABASE_ANON_KEY = 'sb_publishable_OqqdmxjY5PY7I15pmFJBYQ_gQRmhm-n';
 // Mete true lè Google aktive nan Supabase → Authentication → Providers.
 export const GOOGLE_LOGIN = false;
+// Imèl pou moun kontakte w (paj Konfidansyalite, Kondisyon ak FAQ). Mete yon adrès ou li regilyèman.
+export const CONTACT_EMAIL = '';

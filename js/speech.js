@@ -80,6 +80,16 @@ export function preload(texts) {
   }
 }
 
+// Apre mikwofòn nan, iPhone rete an mòd « anrejistre »: son yo vin piti (oswa soti nan ti zòrèy telefòn nan).
+// Nou remete l an mòd « playback » pou vwa a ak son efè yo sonnen nòmal ankò.
+export function restoreAudio() {
+  try {
+    if (!navigator.audioSession) return;
+    navigator.audioSession.type = 'auto';
+    navigator.audioSession.type = 'playback';
+  } catch { /* */ }
+}
+
 const SR = typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
 export const canListen = !!SR;
 
@@ -94,6 +104,7 @@ export async function stopListening() {
   try { a.r.abort(); } catch { /* */ }
   await Promise.race([a.ended, wait(800)]);
   if (active === a) active = null;
+  restoreAudio();
 }
 
 // Koute moun nan. Retounen { done: Promise<string[]>, stop() }.
@@ -108,14 +119,27 @@ export function listen({ onInterim, maxMs = 9000 } = {}) {
     await wait(150); // kite telefòn nan fin chanje son → mikwofòn
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        return await once();
+        const alts = await once();
+        await release(); // tann mikwofòn nan fèmen nèt anvan nou jwe yon son
+        return alts;
       } catch (e) {
+        await release();
         if (e !== 'start' || attempt === 1 || stopped) throw e;
         await stopListening();
         await wait(500); // telefòn nan pa t pare: eseye yon dezyèm fwa
       }
     }
   })();
+
+  async function release() {
+    const a = active;
+    if (a) {
+      await Promise.race([a.ended, wait(700)]);
+      if (active === a) { try { a.r.abort(); } catch { /* */ } active = null; } // li pa t fèmen: fòse l
+    }
+    restoreAudio();
+    await wait(120);
+  }
 
   function once() {
     r = new SR();
@@ -159,4 +183,11 @@ export function listen({ onInterim, maxMs = 9000 } = {}) {
   }
 
   return { done, stop: () => { stopped = true; try { r?.stop(); } catch { /* */ } } };
+}
+
+// Si moun nan kite app la (lòt app, ekran etenn), fèmen mikwofòn nan touswit.
+if (typeof document !== 'undefined') {
+  const off = () => { if (active) stopListening().then(restoreAudio); };
+  document.addEventListener('visibilitychange', () => { if (document.hidden) off(); });
+  window.addEventListener('pagehide', off);
 }
