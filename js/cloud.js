@@ -80,7 +80,7 @@ export function googleUrl() {
 // Apre Google, Supabase retounen ak #access_token=… nan adrès la.
 // Rele l anvan routeur la: li retire token yo nan adrès la touswit.
 export function grabOAuthHash() {
-  if (!cloudReady || !location.hash.includes('access_token=')) return null;
+  if (!cloudReady || !/access_token=|error_code=/.test(location.hash)) return null;
   const h = location.hash;
   history.replaceState(null, '', location.pathname + location.search);
   return h;
@@ -88,6 +88,7 @@ export function grabOAuthHash() {
 export async function takeOAuthRedirect(hash) {
   if (!hash) return false;
   const p = new URLSearchParams(hash.slice(1));
+  if (p.get('error_code')) return 'error';
   try {
     const u = await api('/auth/v1/user', { token: p.get('access_token') });
     setSession({ access_token: p.get('access_token'), refresh_token: p.get('refresh_token'), expires_in: +p.get('expires_in') || 3600, user: u });

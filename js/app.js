@@ -160,6 +160,7 @@ const go = (hash) => { if (location.hash === hash) render(); else location.hash 
 const redirect = (hash) => { history.replaceState(null, '', hash); render(); };
 
 window.addEventListener('hashchange', async () => {
+  if (/access_token=|error_code=/.test(location.hash)) { const h = cloud.grabOAuthHash(); if (h) { authReturn(h); return; } }
   // Bouton retounen pandan yon leson: mande anvan.
   if (session && !session.done && location.hash !== session.hash) {
     const target = location.hash;
@@ -556,6 +557,15 @@ function profileTab() {
   });
 }
 
+// Retounen apre lyen imèl la oswa Google (paj nèf, oswa Koze ki te deja louvri).
+async function authReturn(hash) {
+  if (!hash) return false;
+  const back = await cloud.takeOAuthRedirect(hash);
+  if (back === 'error') { toast('Lyen sa a ekspire oswa li deja sèvi. Mande yon nouvo lyen.'); redirect('#kont'); return true; }
+  if (back) { await sync({ force: true }); toast('Ou konekte. Pwogrè ou sove.'); redirect(S.profile ? '#pwofil' : '#byenvini'); return true; }
+  return false;
+}
+
 // ================================================================ kont (Supabase)
 
 // Mete pwogrè telefòn nan ak pa kont lan ansanm, epi sove rezilta a nan kont lan.
@@ -613,23 +623,31 @@ function accountScreen(step = 'email', email = '') {
     <div class="run-top"><button class="icon-btn" data-back aria-label="Retounen">${ic('arrow-left', 'lg')}</button></div>
     ${step === 'email' ? `
       <h1>Kont Koze ou</h1>
-      <p class="muted">Ekri imèl ou. N ap voye yon kòd 6 chif ba ou: pa gen modpas pou w sonje.</p>
+      <p class="muted">Ekri imèl ou. N ap voye yon lyen ba ou: ou peze l, epi ou konekte. Pa gen modpas pou w sonje.</p>
       <form class="acct-form" data-form novalidate>
         <label for="acct-email">Imèl ou</label>
         <input id="acct-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required placeholder="egzanp@gmail.com" value="${esc(email)}">
         <p class="form-err" role="alert" aria-live="polite"></p>
-        <button class="btn primary big" type="submit">Voye kòd la</button>
+        <button class="btn primary big" type="submit">Voye lyen an</button>
       </form>
       ${cloud.googleReady ? `<p class="or">oswa</p><a class="btn ghost big" href="${esc(cloud.googleUrl())}">Kontinye ak Google</a>` : ''}
       <p class="muted small">Kont lan gratis. Nou sèvi ak imèl ou sèlman pou konekte w ak sove pwogrè ou.</p>` : `
-      <h1>Ekri kòd la</h1>
-      <p class="muted">Nou voye yon kòd 6 chif bay <b translate="no">${esc(email)}</b>. Gade nan imèl ou (ak nan « Spam » si w pa wè l). Si imèl la gen yon lyen olye yon kòd, peze lyen an sou telefòn sa a.</p>
-      <form class="acct-form" data-form novalidate>
-        <label for="acct-code">Kòd 6 chif la</label>
-        <input id="acct-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required class="code-in">
-        <p class="form-err" role="alert" aria-live="polite"></p>
-        <button class="btn primary big" type="submit">Konekte</button>
-      </form>
+      <h1>Gade imèl ou</h1>
+      <ol class="steps">
+        <li>Louvri imèl nou voye bay <b translate="no">${esc(email)}</b> <b>sou telefòn sa a</b>.</li>
+        <li>Peze lyen <b translate="no" lang="en">« Confirm your mail »</b> oswa <b translate="no" lang="en">« Log In »</b> ki ladan l.</li>
+        <li>Koze ap louvri epi w ap konekte.</li>
+      </ol>
+      <p class="muted small">Ou pa wè imèl la? Gade nan « Spam » oswa « Promosyon ». Li ka pran 1 minit.</p>
+      <details class="code-alt">
+        <summary>Imèl la gen yon kòd 6 chif?</summary>
+        <form class="acct-form" data-form novalidate>
+          <label for="acct-code">Kòd 6 chif la</label>
+          <input id="acct-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required class="code-in">
+          <p class="form-err" role="alert" aria-live="polite"></p>
+          <button class="btn primary big" type="submit">Konekte</button>
+        </form>
+      </details>
       <div class="row center-row"><button class="quiet-link" data-resend>Voye yon lòt kòd</button><button class="quiet-link" data-change>Chanje imèl</button></div>`}
   </main>`);
   $('[data-back]').onclick = back;
@@ -644,8 +662,8 @@ function accountScreen(step = 'email', email = '') {
       e.preventDefault();
       const v = inp.value.trim().toLowerCase();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { err('Adrès imèl sa a pa bon. Tcheke l epi eseye ankò.'); inp.focus(); return; }
-      busy(true, 'N ap voye kòd la…');
-      try { await cloud.sendCode(v); accountScreen('code', v); } catch (x) { err(cloud.errorText(x)); busy(false, 'Voye kòd la'); }
+      busy(true, 'N ap voye lyen an…');
+      try { await cloud.sendCode(v); accountScreen('code', v); } catch (x) { err(cloud.errorText(x)); busy(false, 'Voye lyen an'); }
     };
   } else {
     const inp = $('#acct-code');
@@ -1084,7 +1102,7 @@ booting = false;
 
 // Kont: retounen apre Google, epi senkronize an aryè plan.
 (async () => {
-  if (await cloud.takeOAuthRedirect(oauthHash)) { await sync({ force: true }); toast('Ou konekte.'); redirect(S.profile ? '#pwofil' : '#byenvini'); return; }
+  if (await authReturn(oauthHash)) return;
   sync();
 })();
 window.addEventListener('online', () => sync());

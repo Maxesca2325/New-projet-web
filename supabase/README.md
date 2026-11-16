@@ -12,25 +12,12 @@ konekte ak yon **kòd 6 chif pa imèl** epi pwogrè l ap sove nan kont li.
 ## 2. Kreye tab la
 *SQL Editor* → *New query* → kole tout [`migrations/0001_progress.sql`](migrations/0001_progress.sql) → **Run**.
 
-## 3. Imèl ak kòd 6 chif
-1. *Authentication* → *Sign In / Providers* → **Email**: aktive, epi kite *Confirm email* aktive.
-2. *Authentication* → *Emails* → *Templates* (lyen dirèk: https://supabase.com/dashboard/project/invbburpzbemmrphlouc/auth/templates).
-   Modifye **Magic Link** epi **Confirm signup** ak menm sijè ak kò sa yo (kòd la + yon lyen an rezèv):
+## 3. Imèl ak lyen (pa gen anyen pou chanje)
+Koze sèvi ak imèl Supabase pa defo a: li gen yon **lyen** (« Confirm your mail » pou yon nouvo kont, « Log In » pou yon kont ki egziste). Moun nan peze lyen an sou menm telefòn nan, epi Koze louvri ak li konekte.
 
-   - Sijè: `{{ .Token }} se kòd Koze ou`
-   - Kò:
-     ```html
-     <div style="font-family:Arial,sans-serif;max-width:420px;margin:auto;color:#0d1333">
-       <h2 style="margin:0 0 12px">Kòd Koze ou</h2>
-       <p>Ekri kòd sa a nan app Koze a pou w konekte:</p>
-       <p style="font-size:34px;font-weight:bold;letter-spacing:8px;margin:16px 0;color:#0b2bb8">{{ .Token }}</p>
-       <p>Oswa peze bouton sa a <b>sou menm telefòn nan</b>:</p>
-       <p><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#0b2bb8;color:#fff;padding:12px 20px;border-radius:12px;text-decoration:none;font-weight:bold">Konekte nan Koze</a></p>
-       <p style="color:#4f5780;font-size:14px">Kòd la bon pou 1 è. Si se pa ou ki mande l, pa okipe imèl sa a.</p>
-     </div>
-     ```
-   - Peze **Save changes** anba chak template.
-3. *Authentication* → *URL Configuration*: **Site URL** = `https://maxesca2325.github.io/New-projet-web/`, epi ajoute menm adrès la nan **Redirect URLs**. Konsa, si imèl la voye yon *lyen* olye yon kòd, lyen an ap retounen nan Koze epi konekte moun nan.
+Sèl bagay pou regle: *Authentication* → *URL Configuration*: **Site URL** = `https://maxesca2325.github.io/New-projet-web/`, epi ajoute menm adrès la nan **Redirect URLs**.
+
+Si yon jou ou ka modifye templates yo (pa egzanp apre w konekte yon SMTP tankou Resend), mete `{{ .Token }}` nan kò **Magic Link** ak **Confirm signup**: Koze aksepte kòd 6 chif la tou (seksyon « Imèl la gen yon kòd 6 chif? »).
 
 > Plan gratis la voye sèlman kèk imèl pa èdtan. Pou lanse pou anpil moun, konekte yon sèvis imèl (SMTP, pa egzanp Resend) nan *Authentication* → *Emails* → *SMTP Settings*.
 
