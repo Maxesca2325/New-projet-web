@@ -4,11 +4,11 @@
 // - Medya yo (odyo, imaj, polis): kopi a an premye, nan yon cache ki pa efase
 //   lè app la mete ajou, pou moun nan pa telechaje vwa yo ankò.
 // Chanje VERSION chak fwa ou pibliye yon nouvo vèsyon.
-const VERSION = 'koze-v15';
+const VERSION = 'koze-v16';
 const MEDIA = 'koze-media-v2';
 const ASSETS = [
   './', './index.html', './tokens.css', './styles.css', './manifest.webmanifest',
-  './js/app.js', './js/icons.js', './js/sfx.js', './js/data.js', './js/lesson.js', './js/srs.js', './js/speech.js', './js/store.js', './js/util.js',
+  './js/app.js', './js/icons.js', './js/sfx.js', './js/cloud.js', './js/config.js', './js/data.js', './js/lesson.js', './js/srs.js', './js/speech.js', './js/store.js', './js/util.js',
   './audio/index.json',
 ];
 const MEDIA_ASSETS = [

@@ -1,4 +1,5 @@
-// Tout pwogrè a rete sou telefòn moun nan (localStorage). Pa gen kont, pa gen sèvè.
+// Pwogrè a rete sou telefòn moun nan (localStorage). Si l gen yon kont, js/cloud.js
+// senkronize l ak Supabase (merge() pi ba a mete de aparèy ansanm).
 const KEY = 'koze.v1';
 
 const defaults = () => ({
@@ -50,4 +51,26 @@ export function loadRun() {
 }
 export function clearRun() {
   try { sessionStorage.removeItem(RUN_KEY); localStorage.removeItem(RUN_KEY); } catch { /* */ }
+}
+
+// Mete ansanm pwogrè de aparèy (telefòn sa a + kont lan), san pèdi anyen:
+// leson fini yo ajoute, chak fraz pran vèsyon ki pratike plis la, XP pi gwo a,
+// seri ki pi resan an.
+export function merge(local, remote) {
+  if (!remote) return local;
+  const r = { ...defaults(), ...remote };
+  const out = { ...local };
+  out.profile = local.profile || r.profile;
+  out.done = { ...r.done, ...local.done };
+  out.items = { ...r.items };
+  for (const [id, rec] of Object.entries(local.items)) {
+    const o = out.items[id];
+    out.items[id] = !o || rec.seen > o.seen || (rec.seen === o.seen && rec.due >= o.due) ? rec : o;
+  }
+  out.xp = Math.max(local.xp, r.xp);
+  if ((r.lastDay || '') > (local.lastDay || '')) { out.lastDay = r.lastDay; out.streak = r.streak; }
+  else if (r.lastDay === local.lastDay) out.streak = Math.max(local.streak, r.streak);
+  if (r.today.day === local.today.day) out.today = { day: local.today.day, xp: Math.max(local.today.xp, r.today.xp) };
+  else if ((r.today.day || '') > (local.today.day || '')) out.today = r.today;
+  return out;
 }

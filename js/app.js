@@ -6,6 +6,8 @@ import { buildLesson, buildReview } from './lesson.js';
 import { esc, shuffle, pick, typedMatch, spokenMatch, norm, words } from './util.js';
 import { SPRITE } from './icons.js';
 import { sfx, sfxOn, setSfx } from './sfx.js';
+import * as cloud from './cloud.js';
+const oauthHash = cloud.grabOAuthHash(); // avan routeur la wè #access_token
 
 document.body.insertAdjacentHTML('afterbegin', SPRITE);
 
@@ -178,6 +180,7 @@ function render() {
   const [name, ...rest] = h.slice(1).split('-');
   const arg = rest.join('-');
 
+  if (name === 'kont' && cloud.cloudReady) return accountScreen();
   if (!S.profile) {
     if (name === 'kesyon' && +arg >= 1 && +arg <= 4) return setup(+arg);
     if (h !== '#byenvini') return redirect('#byenvini');
@@ -262,7 +265,8 @@ function welcome() {
       <li>${ic('wifi-off')} Mache menm san entènèt</li>
     </ul>
     <div class="grow"></div>
-    <div class="sticky-foot"><button class="btn primary big" data-go>Kòmanse, se gratis</button></div>
+    <div class="sticky-foot"><button class="btn primary big" data-go>Kòmanse, se gratis</button>
+      ${cloud.cloudReady ? '<a class="quiet-link center-link" href="#kont">Mwen gen yon kont deja</a>' : ''}</div>
   </main>`);
   $('[data-say]')?.addEventListener('click', () => say('Thank you very much.'));
   $('[data-go]').onclick = () => { draft = null; go('#kesyon-1'); };
@@ -525,8 +529,9 @@ function profileTab() {
       <button class="switch" data-sfx role="switch" aria-checked="${sfxOn()}">${ic('volume-2')}<span>Son efè (bon/move repons)</span><b>${sfxOn() ? 'Wi' : 'Non'}</b></button>
       <p class="note ${canListen ? 'ok' : ''}">${ic('mic')}<span>${canListen ? 'Egzèsis pale yo mache.' : 'Egzèsis pale yo mache sèlman nan Chrome (Android) ak Safari (iPhone). Ou ka sote yo.'}</span></p>
     </section>
+    ${cloud.cloudReady ? accountPanel() : ''}
     <button class="quiet-link" data-reset>Efase tout pwogrè mwen</button>
-    <p class="foot-note muted small">Koze v0.4 · Tout pwogrè ou rete sou telefòn ou.</p>`, { title: 'Pwofil' });
+    <p class="foot-note muted small">Koze v0.5 · ${cloud.currentUser() ? 'Pwogrè ou sove nan kont ou.' : 'Tout pwogrè ou rete sou telefòn ou.'}</p>`, { title: 'Pwofil' });
   $$('[data-edit]').forEach((a) => (a.onclick = () => { draft = null; }));
   $('[data-sfx]').onclick = (e) => {
     const on = !sfxOn();
@@ -537,8 +542,130 @@ function profileTab() {
     if (on) sfx('ok');
   };
   $('[data-reset]').onclick = async () => {
-    if (await ask('Ou sèten? Tout pwogrè ou ap efase.', 'Efase', true)) { store.clearRun(); S = store.reset(); redirect('#byenvini'); }
+    const msg = cloud.currentUser() ? 'Ou sèten? Tout pwogrè ou ap efase, sou telefòn sa a ak nan kont ou.' : 'Ou sèten? Tout pwogrè ou ap efase.';
+    if (await ask(msg, 'Efase', true)) { store.clearRun(); if (cloud.currentUser()) await cloud.removeRemote(); S = store.reset(); redirect('#byenvini'); }
   };
+  $('[data-signout]')?.addEventListener('click', async () => {
+    if (await ask('Dekonekte? Pwogrè ou rete sou telefòn sa a ak nan kont ou.', 'Dekonekte')) { await cloud.signOut(); toast('Ou dekonekte.'); render(); }
+  });
+  $('[data-sync]')?.addEventListener('click', async (e) => {
+    e.currentTarget.disabled = true;
+    const ok = await sync({ force: true });
+    toast(ok ? 'Pwogrè ou sove.' : 'Pa ka sove kounye a. Eseye ankò pita.');
+    if (location.hash === '#pwofil') render();
+  });
+}
+
+// ================================================================ kont (Supabase)
+
+// Mete pwogrè telefòn nan ak pa kont lan ansanm, epi sove rezilta a nan kont lan.
+let syncing = null;
+function sync({ force = false } = {}) {
+  if (!cloud.cloudReady || !cloud.currentUser() || (!force && navigator.onLine === false)) return Promise.resolve(false);
+  syncing ??= (async () => {
+    try {
+      const remote = await cloud.pull();
+      const merged = store.merge(S, remote);
+      const changed = JSON.stringify(merged) !== JSON.stringify(S);
+      S = merged;
+      save();
+      await cloud.push(S);
+      try { localStorage.setItem('koze.synced', String(Date.now())); } catch { /* */ }
+      if (changed && !session && /^#(aprann|revize|pwofil)?$/.test(location.hash)) render();
+      return true;
+    } catch { return false; } finally { syncing = null; }
+  })();
+  return syncing;
+}
+
+function syncedLabel() {
+  const t = +(localStorage.getItem('koze.synced') || 0);
+  if (!t) return 'poko sove';
+  const min = Math.round((Date.now() - t) / 60000);
+  return min < 1 ? 'kounye a' : min < 60 ? `sa gen ${min} minit` : `sa gen ${Math.round(min / 60)} è`;
+}
+
+function accountPanel() {
+  const u = cloud.currentUser();
+  return u ? `
+    <section class="panel">
+      <h2>Kont ou</h2>
+      <p class="acct">${ic('user-round')}<span translate="no">${esc(u.email)}</span></p>
+      <p class="muted">Dènye fwa pwogrè ou sove: ${syncedLabel()}.</p>
+      <div class="row">
+        <button class="btn secondary" data-sync>${ic('refresh-cw')} Sove kounye a</button>
+        <button class="btn ghost" data-signout>Dekonekte</button>
+      </div>
+    </section>` : `
+    <section class="panel">
+      <h2>Kont ou</h2>
+      <p class="muted">Kreye yon kont gratis pou w pa pèdi pwogrè ou si w chanje telefòn, epi pou w aprann sou plizyè aparèy.</p>
+      <div class="row"><a class="btn secondary" href="#kont">Kreye kont oswa konekte</a></div>
+    </section>`;
+}
+
+// Ekran konekte: 1) imèl  2) kòd 6 chif ki rive pa imèl.
+function accountScreen(step = 'email', email = '') {
+  if (cloud.currentUser()) return redirect(S.profile ? '#pwofil' : '#byenvini');
+  const back = () => (history.length > 1 ? history.back() : redirect(S.profile ? '#pwofil' : '#byenvini'));
+  view(`
+  <main class="screen setup account">
+    <div class="run-top"><button class="icon-btn" data-back aria-label="Retounen">${ic('arrow-left', 'lg')}</button></div>
+    ${step === 'email' ? `
+      <h1>Kont Koze ou</h1>
+      <p class="muted">Ekri imèl ou. N ap voye yon kòd 6 chif ba ou: pa gen modpas pou w sonje.</p>
+      <form class="acct-form" data-form novalidate>
+        <label for="acct-email">Imèl ou</label>
+        <input id="acct-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required placeholder="egzanp@gmail.com" value="${esc(email)}">
+        <p class="form-err" role="alert" aria-live="polite"></p>
+        <button class="btn primary big" type="submit">Voye kòd la</button>
+      </form>
+      ${cloud.googleReady ? `<p class="or">oswa</p><a class="btn ghost big" href="${esc(cloud.googleUrl())}">Kontinye ak Google</a>` : ''}
+      <p class="muted small">Kont lan gratis. Nou sèvi ak imèl ou sèlman pou konekte w ak sove pwogrè ou.</p>` : `
+      <h1>Ekri kòd la</h1>
+      <p class="muted">Nou voye yon kòd 6 chif bay <b translate="no">${esc(email)}</b>. Gade nan imèl ou (ak nan « Spam » si w pa wè l). Si imèl la gen yon lyen olye yon kòd, peze lyen an sou telefòn sa a.</p>
+      <form class="acct-form" data-form novalidate>
+        <label for="acct-code">Kòd 6 chif la</label>
+        <input id="acct-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required class="code-in">
+        <p class="form-err" role="alert" aria-live="polite"></p>
+        <button class="btn primary big" type="submit">Konekte</button>
+      </form>
+      <div class="row center-row"><button class="quiet-link" data-resend>Voye yon lòt kòd</button><button class="quiet-link" data-change>Chanje imèl</button></div>`}
+  </main>`);
+  $('[data-back]').onclick = back;
+  const form = $('[data-form]');
+  const err = (t) => { $('.form-err').textContent = t; };
+  const busy = (on, label) => { const b = form.querySelector('[type=submit]'); b.disabled = on; if (label) b.textContent = label; };
+  if (step === 'email') {
+    const inp = $('#acct-email');
+    inp.focus();
+    inp.oninput = () => err('');
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const v = inp.value.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { err('Adrès imèl sa a pa bon. Tcheke l epi eseye ankò.'); inp.focus(); return; }
+      busy(true, 'N ap voye kòd la…');
+      try { await cloud.sendCode(v); accountScreen('code', v); } catch (x) { err(cloud.errorText(x)); busy(false, 'Voye kòd la'); }
+    };
+  } else {
+    const inp = $('#acct-code');
+    inp.focus();
+    inp.oninput = () => { err(''); inp.value = inp.value.replace(/\D/g, '').slice(0, 6); if (inp.value.length === 6) form.requestSubmit(); };
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      if (inp.value.length !== 6) { err('Kòd la gen 6 chif.'); return; }
+      busy(true, 'N ap konekte w…');
+      try {
+        await cloud.verifyCode(email, inp.value);
+        await sync({ force: true });
+        sfx('ok');
+        toast('Ou konekte. Pwogrè ou sove.');
+        redirect(S.profile ? '#pwofil' : '#byenvini');
+      } catch (x) { err(cloud.errorText(x)); busy(false, 'Konekte'); inp.select(); }
+    };
+    $('[data-resend]').onclick = async () => { try { await cloud.sendCode(email); toast('Nou voye yon nouvo kòd.'); } catch (x) { err(cloud.errorText(x)); } };
+    $('[data-change]').onclick = () => accountScreen('email', email);
+  }
 }
 
 // ================================================================ leson / revizyon
@@ -873,6 +1000,8 @@ function run({ kind, lesson, steps, items, resume = null }) {
     const { goalReached, streakUp } = addXp(xp);
     me.done = true;
     const acc = firstTries ? Math.round((firstOk / firstTries) * 100) : 100;
+    const offerAccount = cloud.cloudReady && !cloud.currentUser() && kind === 'lesson' && !localStorage.getItem('koze.offered');
+    sync();
     const extra = [
       goalReached ? `<li>${ic('target')} Ou rive nan objektif ou jodi a!</li>` : '',
       streakUp ? `<li class="fire-li">${ic('flame')} Seri ou: ${S.streak} jou youn dèyè lòt!</li>` : '',
@@ -888,6 +1017,10 @@ function run({ kind, lesson, steps, items, resume = null }) {
         <div class="stat"><b>${acc}%</b><span>Presizyon</span></div>
         <div class="stat"><b>${S.streak}</b><span>Jou youn dèyè lòt</span></div>
       </div>
+      ${offerAccount ? `<section class="save-offer">
+        <p><b>Pa pèdi pwogrè ou.</b> Kreye yon kont gratis ak imèl ou, epi kontinye sou nenpòt telefòn.</p>
+        <div class="row"><a class="btn secondary" href="#kont" data-offer>Kreye yon kont</a><button class="btn ghost" data-later>Pita</button></div>
+      </section>` : ''}
       ${extra ? `<ul class="wins">${extra}</ul>` : ''}
       <div class="grow"></div>
       <div class="sticky-foot"><button class="btn primary big" data-home>Kontinye</button></div>
@@ -898,6 +1031,8 @@ function run({ kind, lesson, steps, items, resume = null }) {
     const btn = $('[data-home]');
     btn.focus();
     btn.onclick = () => { session = null; redirect(me.back); };
+    $('[data-later]')?.addEventListener('click', (e) => { try { localStorage.setItem('koze.offered', '1'); } catch { /* */ } e.currentTarget.closest('.save-offer').remove(); });
+    $('[data-offer]')?.addEventListener('click', () => { try { localStorage.setItem('koze.offered', '1'); } catch { /* */ } session = null; });
   }
 
   next();
@@ -946,3 +1081,10 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 
 render();
 booting = false;
+
+// Kont: retounen apre Google, epi senkronize an aryè plan.
+(async () => {
+  if (await cloud.takeOAuthRedirect(oauthHash)) { await sync({ force: true }); toast('Ou konekte.'); redirect(S.profile ? '#pwofil' : '#byenvini'); return; }
+  sync();
+})();
+window.addEventListener('online', () => sync());

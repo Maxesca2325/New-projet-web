@@ -385,3 +385,22 @@ p, li, small, .scene, .lead, .muted { text-wrap: pretty; }
 /* Light text on dark surfaces: a touch more air */
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body { letter-spacing: 0.005em; } }
 :root[data-theme="dark"] body { letter-spacing: 0.005em; }
+
+/* ---------- kont (Supabase) ---------- */
+.account h1 { margin-top: var(--space-4); }
+.acct-form { display: grid; gap: var(--space-2); margin-top: var(--space-4); }
+.acct-form label { font-weight: var(--font-weight-bold); }
+.acct-form input { width: 100%; min-height: var(--button-height); padding: 0 var(--space-4); font: inherit; font-size: var(--font-size-md); color: var(--color-text-primary); background: var(--color-bg-secondary); border: var(--border-width) solid var(--color-border-primary); border-radius: var(--border-radius-md); }
+.acct-form input:focus { border-color: var(--color-border-focus); outline: none; box-shadow: var(--shadow-focus); }
+.acct-form input::placeholder { color: var(--color-text-tertiary); }
+.code-in { letter-spacing: 0.4em; font-variant-numeric: tabular-nums; text-align: center; font-size: var(--font-size-xl) !important; }
+.form-err { min-height: 1.5em; color: var(--color-status-error); font-weight: var(--font-weight-bold); font-size: var(--font-size-sm); }
+.acct-form .btn { margin-top: var(--space-2); }
+.or { text-align: center; color: var(--color-text-secondary); margin: var(--space-3) 0; }
+.center-row { justify-content: center; }
+.center-link { display: block; text-align: center; margin-top: var(--space-2); }
+.acct { display: flex; align-items: center; gap: var(--space-2); font-weight: var(--font-weight-bold); word-break: break-all; }
+.acct .ic { color: var(--color-accent-primary); }
+.save-offer { display: grid; gap: var(--space-3); padding: var(--space-4); border-radius: var(--border-radius-lg); background: var(--color-accent-secondary); }
+.save-offer .row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.toast { white-space: normal; max-width: calc(100vw - 2 * var(--space-4)); width: max-content; text-align: center; }
