@@ -80,56 +80,45 @@ export function preload(texts) {
   }
 }
 
-// Apre mikwofòn nan, iPhone rete an mòd « anrejistre »: son yo vin piti (oswa soti nan ti zòrèy telefòn nan).
-// Nou remete l an mòd « playback » pou vwa a ak son efè yo sonnen nòmal ankò.
-export function restoreAudio() {
-  try {
-    if (!navigator.audioSession) return;
-    navigator.audioSession.type = 'auto';
-    navigator.audioSession.type = 'playback';
-  } catch { /* */ }
+// Mòd son iPhone (Safari 16.4+): « playback » pou vwa a ak son efè yo (bouton silans pa koupe yo),
+// « play-and-record » pandan mikwofòn nan louvri. Nou pa janm kite « playback » pandan n ap koute:
+// iPhone refize louvri mikwofòn nan nan mòd sa a.
+function audioMode(type) {
+  try { if (navigator.audioSession && navigator.audioSession.type !== type) navigator.audioSession.type = type; } catch { /* */ }
 }
+export const restoreAudio = () => audioMode('playback');
 
 const SR = typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
 export const canListen = !!SR;
 
-// Yon sèl sesyon mikwofòn alafwa. Anpil telefòn refize kòmanse yon nouvo sesyon
-// pandan ansyen an poko fini nèt: nou fèmen l, epi nou tann li fini anvan.
+// Yon sèl sesyon mikwofòn alafwa.
+// iPhone (Safari): mikwofòn nan louvri SÈLMAN si nou rele start() touswit nan menm klik la (san tann).
+// Kidonk: si pa gen ansyen sesyon, nou kòmanse touswit. Si gen youn (ra), nou fèmen l anvan.
 let active = null; // { r, ended: Promise }
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-export async function stopListening() {
+async function closeActive() {
   const a = active;
   if (!a) return;
   try { a.r.abort(); } catch { /* */ }
   await Promise.race([a.ended, wait(800)]);
   if (active === a) active = null;
+}
+
+export async function stopListening() {
+  if (!active) return;
+  await closeActive();
   restoreAudio();
 }
 
 // Koute moun nan. Retounen { done: Promise<string[]>, stop() }.
 // onInterim(tèks) montre sa navigatè a ap tande pandan moun nan ap pale.
 // Erè yo (rejeksyon done): 'not-allowed', 'network', 'no-speech', 'audio-capture', 'start'…
+// 'start' = mikwofòn nan pa t louvri: moun nan peze l ankò (yon nouvo klik, sa iPhone bezwen).
 export function listen({ onInterim, maxMs = 9000 } = {}) {
   let r = null;
   let stopped = false;
-  const done = (async () => {
-    stopSpeaking();
-    await stopListening();
-    await wait(150); // kite telefòn nan fin chanje son → mikwofòn
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const alts = await once();
-        await release(); // tann mikwofòn nan fèmen nèt anvan nou jwe yon son
-        return alts;
-      } catch (e) {
-        await release();
-        if (e !== 'start' || attempt === 1 || stopped) throw e;
-        await stopListening();
-        await wait(500); // telefòn nan pa t pare: eseye yon dezyèm fwa
-      }
-    }
-  })();
+  stopSpeaking();
 
   async function release() {
     const a = active;
@@ -138,10 +127,10 @@ export function listen({ onInterim, maxMs = 9000 } = {}) {
       if (active === a) { try { a.r.abort(); } catch { /* */ } active = null; } // li pa t fèmen: fòse l
     }
     restoreAudio();
-    await wait(120);
   }
 
   function once() {
+    audioMode('play-and-record');
     r = new SR();
     r.lang = 'en-US';
     r.interimResults = true;
@@ -154,11 +143,13 @@ export function listen({ onInterim, maxMs = 9000 } = {}) {
       let finished = false;
       let started = false;
       let interim = '';
+      let quiet = null;
       const timers = [];
       const end = (fn, v) => {
         if (finished) return;
         finished = true;
         timers.forEach(clearTimeout);
+        clearTimeout(quiet);
         try { r.stop(); } catch { /* */ } // fèmen sesyon an touswit
         fn(v);
       };
@@ -168,7 +159,13 @@ export function listen({ onInterim, maxMs = 9000 } = {}) {
         started = true;
         const res = e.results[e.results.length - 1];
         if (res.isFinal) end(resolve, [...res].map((a) => a.transcript));
-        else { interim = res[0].transcript; onInterim?.(interim); }
+        else {
+          interim = res[0].transcript;
+          onInterim?.(interim);
+          // Safari pa toujou bay yon rezilta final: si moun nan sispann pale 1,5 s, nou pran sa n tande a.
+          clearTimeout(quiet);
+          quiet = setTimeout(() => end(resolve, [interim]), 1500);
+        }
       };
       r.onerror = (e) => end(reject, e.error === 'aborted' && !started ? 'start' : (e.error || 'unknown'));
       r.onend = () => {
@@ -176,18 +173,24 @@ export function listen({ onInterim, maxMs = 9000 } = {}) {
         if (active === me) active = null;
         end(resolve, interim ? [interim] : []); // kèk telefòn fini san rezilta final
       };
-      timers.push(setTimeout(() => { try { r.stop(); } catch { /* */ } }, maxMs));
+      timers.push(setTimeout(() => end(interim ? resolve : reject, interim ? [interim] : 'no-speech'), maxMs));
       timers.push(setTimeout(() => { if (!started) end(reject, 'start'); }, 4000)); // mikwofòn nan pa janm louvri
       try { r.start(); } catch { markEnded(); end(reject, 'start'); }
     });
   }
+
+  // Premye esè a kòmanse touswit (nan klik la). Sèlman si yon ansyen sesyon te toujou louvri, nou tann.
+  const first = active ? closeActive().then(() => (stopped ? Promise.reject('aborted') : once())) : once();
+  const done = first
+    .then(async (alts) => { await release(); return alts; })
+    .catch(async (e) => { await release(); throw e; });
 
   return { done, stop: () => { stopped = true; try { r?.stop(); } catch { /* */ } } };
 }
 
 // Si moun nan kite app la (lòt app, ekran etenn), fèmen mikwofòn nan touswit.
 if (typeof document !== 'undefined') {
-  const off = () => { if (active) stopListening().then(restoreAudio); };
+  const off = () => { if (active) stopListening(); };
   document.addEventListener('visibilitychange', () => { if (document.hidden) off(); });
   window.addEventListener('pagehide', off);
 }

@@ -4,7 +4,7 @@
 // - Medya yo (odyo, imaj, polis): kopi a an premye, nan yon cache ki pa efase
 //   lè app la mete ajou, pou moun nan pa telechaje vwa yo ankò.
 // Chanje VERSION chak fwa ou pibliye yon nouvo vèsyon.
-const VERSION = 'koze-v19';
+const VERSION = 'koze-v20';
 const MEDIA = 'koze-media-v2';
 const ASSETS = [
   './', './index.html', './tokens.css', './styles.css', './manifest.webmanifest',
