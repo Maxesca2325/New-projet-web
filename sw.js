@@ -1,10 +1,11 @@
 // Koze mache san entènèt: nou kenbe fichye app la sou telefòn nan.
 // Chanje VERSION chak fwa ou pibliye yon nouvo vèsyon.
-const VERSION = 'koze-v1';
+const VERSION = 'koze-v2';
 const ASSETS = [
   './', './index.html', './styles.css', './manifest.webmanifest',
-  './js/app.js', './js/data.js', './js/lesson.js', './js/srs.js', './js/speech.js', './js/store.js', './js/util.js',
+  './js/app.js', './js/icons.js', './js/data.js', './js/lesson.js', './js/srs.js', './js/speech.js', './js/store.js', './js/util.js',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png',
+  './fonts/bricolage-grotesque.woff2', './fonts/atkinson-400.woff2', './fonts/atkinson-700.woff2',
 ];
 
 self.addEventListener('install', (e) => {

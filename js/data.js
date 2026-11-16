@@ -3,37 +3,37 @@
 // ⚠️ Kreyòl la dwe revize pa yon moun ki pale l natif natal anvan lansman.
 
 export const PATHS = [
-  { id: 'baz', ikon: '🧱', non: 'Baz', dekri: 'Fraz ou bezwen chak jou, kèlkeswa sa ou fè.' },
-  { id: 'biznis', ikon: '💻', non: 'Biznis online', dekri: 'Pale ak kliyan, vann, livrezon, rezo sosyal.' },
-  { id: 'etid', ikon: '🎓', non: 'Etid', dekri: 'Lekòl, inivèsite, bous, egzamen.' },
-  { id: 'vwayaj', ikon: '✈️', non: 'Vwayaj', dekri: 'Ayewopò, otèl, direksyon, taksi.' },
-  { id: 'lavi', ikon: '🏠', non: 'Lavi chak jou', dekri: 'Magazen, bank, telefòn, randevou.' },
-  { id: 'konstriksyon', ikon: '🏗️', non: 'Konstriksyon', dekri: 'Chantye, zouti, sekirite.' },
-  { id: 'sante', ikon: '🩺', non: 'Swen sante', dekri: 'Pasyan, doktè, lopital, medikaman.' },
+  { id: 'baz', ikon: 'brick-wall', ton: 'blue', non: 'Baz', dekri: 'Fraz ou bezwen chak jou, kèlkeswa sa ou fè.' },
+  { id: 'biznis', ikon: 'store', ton: 'red', non: 'Biznis online', dekri: 'Pale ak kliyan, vann, livrezon, rezo sosyal.' },
+  { id: 'etid', ikon: 'graduation-cap', ton: 'sun', non: 'Etid', dekri: 'Lekòl, inivèsite, bous, egzamen.' },
+  { id: 'vwayaj', ikon: 'plane', ton: 'blue', non: 'Vwayaj', dekri: 'Ayewopò, otèl, direksyon, taksi.' },
+  { id: 'lavi', ikon: 'house', ton: 'leaf', non: 'Lavi chak jou', dekri: 'Magazen, bank, telefòn, randevou.' },
+  { id: 'konstriksyon', ikon: 'hard-hat', ton: 'sun', non: 'Konstriksyon', dekri: 'Chantye, zouti, sekirite.' },
+  { id: 'sante', ikon: 'stethoscope', ton: 'red', non: 'Swen sante', dekri: 'Pasyan, doktè, lopital, medikaman.' },
 ];
 
 export const GOALS = [
-  { id: 'travay', ikon: '💼', label: 'Pou travay' },
-  { id: 'etid', ikon: '🎓', label: 'Pou lekòl oswa inivèsite' },
-  { id: 'vwayaj', ikon: '✈️', label: 'Pou vwayaje' },
-  { id: 'biznis', ikon: '💻', label: 'Pou biznis mwen' },
-  { id: 'lavi', ikon: '🏠', label: 'Pou lavi chak jou ak fanmi' },
+  { id: 'travay', ikon: 'briefcase', label: 'Pou travay' },
+  { id: 'etid', ikon: 'graduation-cap', label: 'Pou lekòl oswa inivèsite' },
+  { id: 'vwayaj', ikon: 'plane', label: 'Pou vwayaje' },
+  { id: 'biznis', ikon: 'store', label: 'Pou biznis mwen' },
+  { id: 'lavi', ikon: 'heart', label: 'Pou lavi chak jou ak fanmi' },
 ];
 
 // Chemen nou chwazi davans selon objektif la (moun nan ka chanje l).
 export const GOAL_TO_PATH = { etid: 'etid', vwayaj: 'vwayaj', biznis: 'biznis', lavi: 'lavi' };
 
 export const LEVELS = [
-  { id: 'zewo', ikon: '🌱', label: 'Mwen pa konn anyen', desc: 'N ap kòmanse depi nan baz la, dousman.' },
-  { id: 'pi', ikon: '🌿', label: 'Mwen konn kèk mo', desc: 'N ap fè w ekri pi souvan.' },
-  { id: 'baz', ikon: '🌳', label: 'Mwen konn baz la', desc: 'Ou ka sote leson baz yo epi ale dirèk nan chemen ou.' },
+  { id: 'zewo', ikon: 'sprout', label: 'Mwen pa konn anyen', desc: 'N ap kòmanse depi nan baz la, dousman.' },
+  { id: 'pi', ikon: 'leaf', label: 'Mwen konn kèk mo', desc: 'N ap fè w ekri pi souvan.' },
+  { id: 'baz', ikon: 'tree-deciduous', label: 'Mwen konn baz la', desc: 'Ou ka sote leson baz yo epi ale dirèk nan chemen ou.' },
 ];
 
 export const MINUTES = [
-  { id: 5, ikon: '☕', label: '5 minit pa jou', desc: 'Dousman' },
-  { id: 10, ikon: '🚶', label: '10 minit pa jou', desc: 'Nòmal' },
-  { id: 15, ikon: '🏃', label: '15 minit pa jou', desc: 'Serye' },
-  { id: 20, ikon: '🚀', label: '20 minit pa jou', desc: 'Entans' },
+  { id: 5, ikon: 'coffee', label: '5 minit pa jou', desc: 'Dousman' },
+  { id: 10, ikon: 'footprints', label: '10 minit pa jou', desc: 'Nòmal' },
+  { id: 15, ikon: 'zap', label: '15 minit pa jou', desc: 'Serye' },
+  { id: 20, ikon: 'rocket', label: '20 minit pa jou', desc: 'Entans' },
 ];
 
 const L = (id, path, tit, sitiyasyon, objektif, rows) => ({

@@ -66,3 +66,15 @@ Tout kontni an nan `js/data.js`. Chak fraz gen 3 pati:
 - [ ] Kont + senkronizasyon ant aparèy yo
 - [ ] Premium: IA k ap jwe wòl (patwon, kliyan, pasyan), tout leson, san piblisite
 - [ ] Peman: kat (dyaspora) + MonCash
+
+## Design (v0.2)
+
+- **Koulè**: ble ak wouj drapo ayisyen an, plis jòn ak vè yon tap-tap. Bann koulè tap-tap la parèt sèlman sou akèy la ak sou kat pwochen leson an.
+- **Logo**: yon bil pawòl (koze) ble anlè, wouj anba, ak yon « k » blan (`icons/icon.svg`).
+- **Polis** (nan `fonts/`, mache san entènèt):
+  - *Bricolage Grotesque* pou tit yo
+  - *Atkinson Hyperlegible* pou tèks la. Li fèt pou moun li fasil, menm sou yon ti ekran nan solèy.
+- **Ikòn**: [Lucide](https://lucide.dev) (lisans ISC), nan `js/icons.js`.
+- Mòd lannwit otomatik.
+
+Polis yo gen lisans SIL Open Font License.
