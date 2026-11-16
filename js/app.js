@@ -13,7 +13,7 @@ document.body.insertAdjacentHTML('afterbegin', SPRITE);
 
 const ic = (name, cls = '') => `<svg class="ic ${cls}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 const LOGO = `<svg viewBox="0 0 64 64" aria-hidden="true"><defs><clipPath id="kz-b"><path d="M14 8h36a10 10 0 0 1 10 10v22a10 10 0 0 1-10 10H30l-12 10v-10h-4A10 10 0 0 1 4 40V18A10 10 0 0 1 14 8z"/></clipPath></defs><g clip-path="url(#kz-b)"><rect width="64" height="29" fill="#0b2bb8"/><rect y="29" width="64" height="35" fill="#d21034"/></g><path d="M25 18v22M25 31l11-11M28.5 28l8.5 12" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
-const wordmark = (big = false) => `<span class="wordmark ${big ? 'big' : ''}">${LOGO}<span>koze</span></span>`;
+const wordmark = (big = false) => `<span class="wordmark ${big ? 'big' : ''}" translate="no">${LOGO}<span>koze</span></span>`;
 const STRIPES = '<div class="stripes" aria-hidden="true"><i></i><i></i><i></i><i></i></div>';
 const ptile = (p, cls = '') => `<span class="ptile t-${p.ton} ${cls}">${ic(p.ikon, 'lg')}</span>`;
 const MASKOT = {
@@ -61,13 +61,15 @@ function view(html, { keepScroll = false } = {}) {
 }
 
 // Fenèt konfimasyon andedan app la. Li remete fokis la kote l te ye apre.
-function ask(msg, yes, danger = false) {
+function ask(msg, yes, danger = false, stay = '') {
   return new Promise((resolve) => {
     const before = document.activeElement;
     const m = document.createElement('div');
     m.className = 'modal';
     m.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ask-t"><p id="ask-t">${esc(msg)}</p>
-      <div class="row"><button class="btn ghost" data-no>Non</button><button class="btn ${danger ? 'danger' : 'primary'}" data-yes>${esc(yes)}</button></div></div>`;
+      <div class="row">${stay
+        ? `<button class="btn ghost" data-yes>${esc(yes)}</button><button class="btn primary" data-no>${esc(stay)}</button>`
+        : `<button class="btn ghost" data-no>Non</button><button class="btn ${danger ? 'danger' : 'primary'}" data-yes>${esc(yes)}</button>`}</div></div>`;
     const close = (v) => {
       m.remove();
       document.removeEventListener('keydown', onKey, true);
@@ -160,7 +162,7 @@ window.addEventListener('hashchange', async () => {
   if (session && !session.done && location.hash !== session.hash) {
     const target = location.hash;
     history.pushState(null, '', session.hash);
-    if (await ask('Ou vle kite? Pwogrè sa a ap pèdi.', 'Wi, kite')) {
+    if (await ask('Ou vle kite? Pwogrè sa a ap pèdi.', 'Wi, kite', false, 'Kontinye')) {
       stopSpeaking(); stopListening(); store.clearRun();
       session = null;
       redirect(target || '#aprann');
@@ -249,7 +251,7 @@ function welcome() {
     </div>
     <p class="lead">Leson 5 a 10 minit ki swiv lavi ou: biznis, lekòl, vwayaj, chantye, lopital.</p>
     <div class="sample" aria-label="Egzanp yon fraz">
-      <div class="sample-row"><span class="lang">EN</span><span class="en">Thank you very much.</span>
+      <div class="sample-row"><span class="lang">EN</span><span class="en" translate="no" lang="en">Thank you very much.</span>
         ${canSpeak ? `<button class="mini-say" data-say aria-label="Koute">${ic('volume-2')}</button>` : ''}</div>
       <span class="say-as"><span class="lbl">Di l konsa</span><b>Tènk yu vèri moch</b></span>
       <div class="sample-row"><span class="lang kr">KR</span><span>Mèsi anpil.</span></div>
@@ -318,8 +320,8 @@ function setup(step) {
     <div class="run-top">
       <button class="icon-btn" data-back aria-label="Retounen">${ic('arrow-left', 'lg')}</button>
       <div class="bar" role="progressbar" aria-label="Kesyon ${step} sou ${total}" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${step}"><i style="width:${(step / total) * 100}%"></i></div>
+      <span class="step-count" aria-hidden="true">${step}/${total}</span>
     </div>
-    <p class="eyebrow">Kesyon ${step} sou ${total}</p>
     <h1>${esc(q.title)}</h1>
     ${q.sub ? `<p class="muted">${esc(q.sub)}</p>` : ''}
     <div class="choices">
@@ -365,8 +367,8 @@ function learnTab() {
     <section class="next-card">
       ${STRIPES}
       <div class="next-body">
-        <p class="eyebrow">${esc(PATH.get(next.path).non)} · Pwochen leson</p>
         <h2>${esc(next.tit)}</h2>
+        <p class="meta">Pwochen leson · ${esc(PATH.get(next.path).non)} · ${next.items.length} fraz</p>
         <p class="muted">${esc(next.sitiyasyon)}</p>
         <p class="goal-line">${ic('target')}<span>Apre leson sa a, ou ap ka ${esc(next.objektif)}</span></p>
         ${(() => {
@@ -451,7 +453,6 @@ function reviewTab() {
     </section>`
     : due.length ? `
     <section class="review-hero">
-      <p class="eyebrow">${ic('brain')} Revizyon jodi a</p>
       <h2>${due.length} fraz ap tann ou</h2>
       <p class="muted">Revize yo kounye a, anvan memwa w kite yo ale. Sa pran ${Math.max(1, Math.round(Math.min(due.length, REVIEW_SIZE) / 3))} minit.</p>
       <a class="btn primary big" href="#revizyon">${ic('refresh-cw')} Revize kounye a</a>
@@ -467,10 +468,12 @@ function reviewTab() {
   shell('revize', `
     ${hero}
     ${recs.length ? `
-    <section class="memory" aria-label="Fòs memwa ou">
-      <div class="mem new"><b>${nNew}</b><span>Nouvo</span></div>
-      <div class="mem mid"><b>${nMid}</b><span>Ap aprann</span></div>
-      <div class="mem top"><b>${nTop}</b><span>Metrize</span></div>
+    <section class="memory" aria-label="Fòs memwa ou: ${nTop} metrize, ${nMid} ap aprann, ${nNew} nouvo">
+      <h2 class="section-title">Fòs memwa ou</h2>
+      <div class="mem-bar" aria-hidden="true">
+        ${nTop ? `<i class="top" style="flex:${nTop}"></i>` : ''}${nMid ? `<i class="mid" style="flex:${nMid}"></i>` : ''}${nNew ? `<i class="new" style="flex:${nNew}"></i>` : ''}
+      </div>
+      <p class="mem-legend"><span class="top"><b>${nTop}</b> metrize</span><span class="mid"><b>${nMid}</b> ap aprann</span><span class="new"><b>${nNew}</b> nouvo</span></p>
     </section>
     <h2 class="section-title">Fraz ou aprann yo</h2>
     ${byLesson.map(({ l, rows }) => `
@@ -481,7 +484,7 @@ function reviewTab() {
             const [cls, label] = level(S.items[it.id].box);
             return `<li class="pl-row">
               <div class="pl-txt">
-                <span class="pl-en">${esc(it.en)}</span>
+                <span class="pl-en" translate="no" lang="en">${esc(it.en)}</span>
                 <span class="pl-son">${esc(it.son)}</span>
                 <span class="pl-kr">${esc(it.ht)}</span>
               </div>
@@ -502,16 +505,15 @@ function profileTab() {
   const doneCount = Object.keys(S.done).length;
   const p = S.profile;
   shell('pwofil', `
-    <section class="grid-stats">
-      <div class="stat"><b>${ic('flame', 'fire-ic')} ${streakNow()}</b><span>Jou youn dèyè lòt</span></div>
-      <div class="stat"><b>${ic('star', 'xp-ic')} ${S.xp}</b><span>XP total</span></div>
-      <div class="stat"><b>${ic('check', 'ok-ic')} ${mastered}</b><span>Fraz ou metrize</span></div>
-      <div class="stat"><b>${ic('book-open', 'blue-ic')} ${doneCount}/${LESSONS.length}</b><span>Leson fini</span></div>
+    <section class="panel">
+      <h2>Pwogrè ou</h2>
+      <div class="bar" role="progressbar" aria-label="Leson fini" aria-valuemin="0" aria-valuemax="${LESSONS.length}" aria-valuenow="${doneCount}"><i style="width:${Math.round((doneCount / LESSONS.length) * 100)}%"></i></div>
+      <p>${doneCount} leson fini sou ${LESSONS.length} · <b>${mastered}</b> fraz metrize · ${learning} fraz w ap aprann</p>
     </section>
     <section class="panel">
       <h2>Chemen ou</h2>
       <ul class="my-paths">${p.paths.map((id) => `<li>${ptile(PATH.get(id), 'sm')}${esc(PATH.get(id).non)}</li>`).join('')}</ul>
-      <p class="muted"><b>Nivo:</b> ${esc(LEVELS.find((l) => l.id === p.level)?.label || '')} · <b>${p.minutes} minit</b> pa jou · ${learning} fraz w ap aprann</p>
+      <p class="muted"><b>Nivo:</b> ${esc(LEVELS.find((l) => l.id === p.level)?.label || '')} · <b>${p.minutes} minit</b> pa jou</p>
       <div class="row">
         <a class="btn secondary" href="#kesyon-2" data-edit>Chanje chemen</a>
         <a class="btn ghost" href="#kesyon-1" data-edit>Chanje tout preferans yo</a>
@@ -591,7 +593,7 @@ function run({ kind, lesson, steps, items, resume = null }) {
       <div class="run-foot" aria-live="polite">${foot}</div>
     </main>`);
     $('[data-quit]').onclick = async () => {
-      if (await ask('Ou vle kite? Pwogrè sa a ap pèdi.', 'Wi, kite')) {
+      if (await ask('Ou vle kite? Pwogrè sa a ap pèdi.', 'Wi, kite', false, 'Kontinye')) {
         stopSpeaking();
         store.clearRun();
         session = null;
@@ -634,10 +636,10 @@ function run({ kind, lesson, steps, items, resume = null }) {
           </div>
         </div>
         ${given && !ok ? `<p class="fb-given">Ou te mete: <s>${esc(given)}</s></p>` : ''}
-        <p class="fb-en">${esc(st.item.en)} <button class="mini-say" data-say aria-label="Koute">${ic('volume-2')}</button></p>
+        <p class="fb-en"><span translate="no" lang="en">${esc(st.item.en)}</span> <button class="mini-say" data-say aria-label="Koute">${ic('volume-2')}</button></p>
         <p class="fb-ht">${esc(st.item.ht)} · <i>${esc(st.item.son)}</i></p>
         ${!ok ? '<p class="fb-again">Fraz sa a ap tounen nan fen leson an.</p>' : ''}
-        <button class="btn ${ok ? 'primary' : 'danger'} big" data-continue>Kontinye</button>
+        <button class="btn ${ok ? 'primary' : 'ink'} big" data-continue>Kontinye</button>
       </div>`;
     $$('.run-body button, .run-body textarea').forEach((el) => (el.disabled = true));
     foot.querySelector('[data-say]').onclick = () => say(st.item.en);
@@ -654,8 +656,8 @@ function run({ kind, lesson, steps, items, resume = null }) {
     frame(`
       <div class="situation">
         ${ptile(p, 'xl')}
-        <p class="eyebrow">${esc(p.non)} · ${l.items.length} fraz</p>
         <h2 class="sit-title">${esc(l.tit)}</h2>
+        <p class="meta">${esc(p.non)} · ${l.items.length} fraz</p>
         <p class="scene">${esc(l.sitiyasyon)}</p>
         <p class="goal-line">${ic('target')}<span>Apre leson sa a, ou ap ka ${esc(l.objektif)}</span></p>
         <p class="note">${ic('volume-2')}<span>${canSpeak
@@ -671,7 +673,7 @@ function run({ kind, lesson, steps, items, resume = null }) {
       <p class="instr">${ic('sparkles')} Nouvo fraz</p>
       <div class="card phrase">
         <span class="lang">EN</span>
-        <p class="en">${esc(item.en)}</p>
+        <p class="en" translate="no" lang="en">${esc(item.en)}</p>
         <span class="say-as"><span class="lbl">Di l konsa</span><b>${esc(item.son)}</b></span>
         <p class="kr"><span class="lang kr">KR</span>${esc(item.ht)}</p>
         ${canSpeak ? `<div class="say-row">
@@ -699,7 +701,7 @@ function run({ kind, lesson, steps, items, resume = null }) {
 
     const prompt = {
       choose_ht: `<p class="instr">Kisa sa vle di?</p>
-        <p class="prompt"><span class="lang">EN</span>${esc(item.en)} ${canSpeak ? `<button class="mini-say" data-say aria-label="Koute">${ic('volume-2')}</button>` : ''}</p>`,
+        <p class="prompt"><span class="lang">EN</span><span translate="no" lang="en">${esc(item.en)}</span> ${canSpeak ? `<button class="mini-say" data-say aria-label="Koute">${ic('volume-2')}</button>` : ''}</p>`,
       choose_en: `<p class="instr">Kijan yo di sa an anglè?</p><p class="prompt"><span class="lang kr">KR</span>${esc(item.ht)}</p>`,
       listen: `<p class="instr">Koute epi chwazi sa ou tande.</p>
         <div class="listen-row">
@@ -709,7 +711,7 @@ function run({ kind, lesson, steps, items, resume = null }) {
     }[kind];
 
     frame(`${prompt}
-      <div class="opts" role="group" aria-label="Chwazi yon repons">${options.map((o, i) => `<button class="opt" data-i="${i}" aria-pressed="false"><span class="n">${i + 1}</span><span>${esc(o)}</span></button>`).join('')}</div>`,
+      <div class="opts" role="group" aria-label="Chwazi yon repons">${options.map((o, i) => `<button class="opt" data-i="${i}" aria-pressed="false"><span class="n">${i + 1}</span><span ${field === 'en' ? 'translate="no" lang="en"' : ''}>${esc(o)}</span></button>`).join('')}</div>`,
     checkBtn());
     let chosen = null;
     $$('.opt').forEach((b) => (b.onclick = () => {
@@ -751,8 +753,8 @@ function run({ kind, lesson, steps, items, resume = null }) {
       <div class="bank" aria-label="Mo yo"></div>`, checkBtn());
 
     const draw = () => {
-      $('.answer-line').innerHTML = answer.map((t) => `<button class="tile-w" data-a="${t.i}">${esc(t.w)}</button>`).join('');
-      $('.bank').innerHTML = tiles.map((t) => `<button class="tile-w ${answer.includes(t) ? 'used' : ''}" data-b="${t.i}" ${answer.includes(t) ? 'disabled aria-hidden="true"' : ''}>${esc(t.w)}</button>`).join('');
+      $('.answer-line').innerHTML = answer.map((t) => `<button class="tile-w" translate="no" lang="en" data-a="${t.i}">${esc(t.w)}</button>`).join('');
+      $('.bank').innerHTML = tiles.map((t) => `<button class="tile-w ${answer.includes(t) ? 'used' : ''}" translate="no" lang="en" data-b="${t.i}" ${answer.includes(t) ? 'disabled aria-hidden="true"' : ''}>${esc(t.w)}</button>`).join('');
       $$('[data-b]').forEach((b) => (b.onclick = () => { sfx('tap'); answer.push(tiles.find((t) => t.i === +b.dataset.b)); draw(); }));
       $$('[data-a]').forEach((b) => (b.onclick = () => { sfx('tap'); answer.splice(answer.findIndex((t) => t.i === +b.dataset.a), 1); draw(); }));
       $('[data-check]').disabled = answer.length === 0;
@@ -779,7 +781,7 @@ function run({ kind, lesson, steps, items, resume = null }) {
     inp.focus();
     inp.oninput = () => { $('[data-check]').disabled = !inp.value.trim(); };
     inp.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); if (inp.value.trim()) $('[data-check]').click(); } };
-    $('[data-hint]').onclick = () => { $('.hint').textContent = `Li kòmanse ak: "${words(item.en)[0]} …"`; };
+    $('[data-hint]').onclick = () => { $('.hint').textContent = `Li kòmanse ak: « ${words(item.en)[0]} … »`; };
     $('[data-check]').onclick = () => {
       const m = typedMatch(inp.value, item.en);
       result(st, m !== 'wrong', { close: m === 'close', given: inp.value.trim() });
@@ -803,7 +805,7 @@ function run({ kind, lesson, steps, items, resume = null }) {
     frame(`
       <p class="instr">${ic('mic')} Di fraz sa a byen fò.</p>
       <div class="card phrase">
-        <p class="en">${esc(item.en)}</p>
+        <p class="en" translate="no" lang="en">${esc(item.en)}</p>
         <span class="say-as"><span class="lbl">Di l konsa</span><b>${esc(item.son)}</b></span>
         ${canSpeak ? `<div class="say-row"><button class="btn ghost" data-say>${ic('volume-2')} Koute anvan</button></div>` : ''}
       </div>
@@ -837,7 +839,7 @@ function run({ kind, lesson, steps, items, resume = null }) {
         xp += 10;
         vibrate(25);
         sfx('ok');
-        heard(`<p class="said">${colored}</p>`);
+        heard(`<p class="said" translate="no" lang="en">${colored}</p>`);
         $('.run-foot').innerHTML = `<div class="fb ok">
           <div class="fb-head">${maskot('kontan', 'fb-maskot')}<div><p class="fb-title">${ic('mic')}${m.score === 1 ? pick(PRAISE) : 'Byen di!'}</p>
           <p class="fb-label">Telefòn nan konprann ${Math.round(m.score * 100)}% fraz la.</p></div></div>
@@ -846,7 +848,7 @@ function run({ kind, lesson, steps, items, resume = null }) {
         $('[data-continue]').focus();
       } else {
         sfx('bad');
-        heard(`<p class="said">${colored}</p>
+        heard(`<p class="said" translate="no" lang="en">${colored}</p>
           <p class="muted small">Nou tande: « ${esc(m.heard)} ». Mo ki an gri yo pa t klè. ${tries < 2 ? 'Koute ankò, epi eseye ankò dousman.' : 'Pa gen pwoblèm: w ap pratike fraz sa a ankò pita.'}</p>`);
         if (tries >= 2) {
           const b = $('[data-skip]');
