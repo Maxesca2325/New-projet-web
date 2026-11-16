@@ -1,7 +1,7 @@
 import { PATHS, GOALS, GOAL_TO_PATH, LEVELS, MINUTES, LESSONS } from './data.js';
 import * as store from './store.js';
 import { grade, dueIds, MASTERED_BOX } from './srs.js';
-import { say, canSpeak, canListen, listen, setAudioIndex, preload, stopSpeaking } from './speech.js';
+import { say, canSpeak, canListen, listen, stopListening, setAudioIndex, preload, stopSpeaking } from './speech.js';
 import { buildLesson, buildReview } from './lesson.js';
 import { esc, shuffle, pick, typedMatch, spokenMatch, norm, words } from './util.js';
 import { SPRITE } from './icons.js';
@@ -160,7 +160,7 @@ window.addEventListener('hashchange', async () => {
     const target = location.hash;
     history.pushState(null, '', session.hash);
     if (await ask('Ou vle kite? Pwogrè sa a ap pèdi.', 'Wi, kite')) {
-      stopSpeaking();
+      stopSpeaking(); stopListening();
       session = null;
       redirect(target || '#aprann');
     }
@@ -572,7 +572,7 @@ function run({ kind, lesson, steps, items }) {
     if (DEBUG) window.__kozeStep = st;
     ({ situation, intro, choose_ht: choice, choose_en: choice, listen: choice, order, type, speak })[st.type](st);
   };
-  const advance = () => { pos += 1; next(); };
+  const advance = () => { stopListening(); pos += 1; next(); };
 
   // Rezilta yon egzèsis: fèy anba a ak maskòt la.
   const result = (st, ok, { close = false, given = '' } = {}) => {
@@ -754,6 +754,7 @@ function run({ kind, lesson, steps, items }) {
     'not-allowed': 'Koze pa gen dwa sèvi ak mikwofòn nan. Peze kadna a bò adrès sit la (oswa Paramèt → Sit → Mikwofòn) epi pèmèt li.',
     'service-not-allowed': 'Navigatè sa a pa kite Koze sèvi ak mikwofòn nan. Eseye ak Chrome (Android) oswa Safari (iPhone).',
     network: 'Pou tande w, telefòn nan bezwen entènèt. Konekte w epi eseye ankò, oswa kontinye san pale.',
+    start: 'Mikwofòn nan pa t ka louvri. Peze l ankò.',
     'no-speech': 'Nou pa tande anyen. Pale pi fò, pi pre telefòn nan.',
     'audio-capture': 'Nou pa jwenn mikwofòn nan. Tcheke si yon lòt app ap sèvi ak li.',
   };
