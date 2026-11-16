@@ -14,17 +14,22 @@ konekte ak yon **kòd 6 chif pa imèl** epi pwogrè l ap sove nan kont li.
 
 ## 3. Imèl ak kòd 6 chif
 1. *Authentication* → *Sign In / Providers* → **Email**: aktive, epi kite *Confirm email* aktive.
-2. *Authentication* → *Emails* → *Templates* → **Magic Link**. Ranplase tèks la pa sa a pou imèl la voye **kòd la**:
+2. *Authentication* → *Emails* → *Templates* (lyen dirèk: https://supabase.com/dashboard/project/invbburpzbemmrphlouc/auth/templates).
+   Modifye **Magic Link** epi **Confirm signup** ak menm sijè ak kò sa yo (kòd la + yon lyen an rezèv):
 
-   - Sijè: `Kòd Koze ou`
+   - Sijè: `{{ .Token }} se kòd Koze ou`
    - Kò:
      ```html
-     <h2>Kòd Koze ou</h2>
-     <p>Ekri kòd sa a nan app la pou w konekte:</p>
-     <p style="font-size:28px;font-weight:bold;letter-spacing:6px">{{ .Token }}</p>
-     <p>Kòd la bon pou 1 è. Si se pa ou ki mande l, pa okipe imèl sa a.</p>
+     <div style="font-family:Arial,sans-serif;max-width:420px;margin:auto;color:#0d1333">
+       <h2 style="margin:0 0 12px">Kòd Koze ou</h2>
+       <p>Ekri kòd sa a nan app Koze a pou w konekte:</p>
+       <p style="font-size:34px;font-weight:bold;letter-spacing:8px;margin:16px 0;color:#0b2bb8">{{ .Token }}</p>
+       <p>Oswa peze bouton sa a <b>sou menm telefòn nan</b>:</p>
+       <p><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#0b2bb8;color:#fff;padding:12px 20px;border-radius:12px;text-decoration:none;font-weight:bold">Konekte nan Koze</a></p>
+       <p style="color:#4f5780;font-size:14px">Kòd la bon pou 1 è. Si se pa ou ki mande l, pa okipe imèl sa a.</p>
+     </div>
      ```
-   - Fè menm bagay la pou template **Confirm signup** (premye fwa yon moun kreye kont).
+   - Peze **Save changes** anba chak template.
 3. *Authentication* → *URL Configuration*: **Site URL** = `https://maxesca2325.github.io/New-projet-web/`, epi ajoute menm adrès la nan **Redirect URLs**. Konsa, si imèl la voye yon *lyen* olye yon kòd, lyen an ap retounen nan Koze epi konekte moun nan.
 
 > Plan gratis la voye sèlman kèk imèl pa èdtan. Pou lanse pou anpil moun, konekte yon sèvis imèl (SMTP, pa egzanp Resend) nan *Authentication* → *Emails* → *SMTP Settings*.
