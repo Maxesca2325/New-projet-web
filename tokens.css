@@ -1,0 +1,196 @@
+/* Koze — design tokens
+   Philosophy: "Tap-tap" = Scandinavian base (warm, legible, rounded, accessible)
+   with Neo-Memphis accents only on the tap-tap stripe, the mascot and victory moments.
+   See .design/koze/DESIGN_BRIEF.md and .design/koze/DESIGN_TOKENS.md.
+   Every component uses these tokens; no raw values in styles.css. */
+
+@font-face { font-family: "Bricolage Grotesque"; src: url("fonts/bricolage-grotesque.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
+@font-face { font-family: "Atkinson Hyperlegible"; src: url("fonts/atkinson-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Atkinson Hyperlegible"; src: url("fonts/atkinson-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+
+/* Breakpoints (for media queries; CSS variables cannot be used inside them):
+   sm 375px · md 768px · lg 1024px · xl 1280px · 2xl 1536px
+   Koze is one column, mobile first: --max-width-content keeps it phone-shaped on big screens. */
+
+:root {
+  /* ---------- Brand (the Haitian flag + tap-tap paint) ---------- */
+  --color-brand-blue: #0b2bb8;
+  --color-brand-red: #d21034;
+  --color-brand-sun: #f2a900;
+  --color-brand-leaf: #0b8a4c;
+  --color-brand-blue-soft: #e5eaff;
+  --color-brand-red-soft: #fde6ea;
+  --color-brand-sun-soft: #fff3cf;
+  --color-brand-leaf-soft: #e1f5ea;
+  --color-brand-sun-ink: #6b4b00;       /* text/icon on sun-soft */
+  --color-brand-sun-icon: #a87400;      /* sun as an icon on white (3:1); plain --color-brand-sun is for fills only */
+
+  /* ---------- Backgrounds ---------- */
+  --color-bg-primary: #f2f4fa;          /* page: cool off-white, biased to the blue */
+  --color-bg-secondary: #ffffff;        /* cards, sheets, options */
+  --color-bg-tertiary: #e8ecf6;         /* wells, empty tiles, track */
+  --color-bg-inverse: #0d1333;
+
+  /* ---------- Text ---------- */
+  --color-text-primary: #0d1333;
+  --color-text-secondary: #4f5780;
+  --color-text-tertiary: #7d84a6;       /* placeholders, disabled */
+  --color-text-inverse: #f2f4fa;
+  --color-text-link: #0b2bb8;
+  --color-text-on-accent: #ffffff;
+
+  /* ---------- Borders ---------- */
+  --color-border-primary: #dce1ef;
+  --color-border-secondary: #e8ecf6;
+  --color-border-strong: #0d1333;       /* the one framed card (next lesson) */
+  --color-border-focus: #0b2bb8;
+
+  /* ---------- Accent (actions) ---------- */
+  --color-accent-primary: #0b2bb8;
+  --color-accent-primary-hover: #0a26a3;
+  --color-accent-primary-active: #061a7a;   /* also the "pressed" edge of 3D buttons */
+  --color-accent-secondary: #e5eaff;
+  --color-accent-secondary-text: #0b2bb8;
+
+  /* ---------- Status ---------- */
+  --color-status-success: #0b7a43;
+  --color-status-success-bg: #dff4e8;
+  --color-status-warning: #8a5d00;
+  --color-status-warning-bg: #fff3cf;
+  --color-status-error: #b8173a;
+  --color-status-error-bg: #fde7ec;
+  --color-status-info: #0b2bb8;
+  --color-status-info-bg: #e5eaff;
+
+  --color-surface-overlay: rgba(13, 19, 51, 0.45);
+
+  /* ---------- Spacing (4px base, 16px = --space-4) ---------- */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 128px;
+  --space-11: 192px;
+  --space-12: 256px;
+
+  /* ---------- Typography ---------- */
+  --font-family-display: "Bricolage Grotesque", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --font-family-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-family-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --font-size-xs: 0.8125rem;    /* 13px  labels, eyebrows */
+  --font-size-sm: 0.9375rem;    /* 15px  secondary text */
+  --font-size-base: 1.0625rem;  /* 17px  body (never below 16px on phones) */
+  --font-size-md: 1.1875rem;    /* 19px  lead, scene */
+  --font-size-lg: 1.375rem;     /* 22px  section titles, feedback title */
+  --font-size-xl: 1.625rem;     /* 26px  prompts */
+  --font-size-2xl: 1.875rem;    /* 30px  screen titles */
+  --font-size-3xl: 2.125rem;    /* 34px  phrase to learn */
+  --font-size-4xl: clamp(2.4rem, 10vw, 3.1rem); /* welcome hero */
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;    /* display face only; Atkinson falls back to 400 */
+  --font-weight-semibold: 650;  /* display face */
+  --font-weight-bold: 700;
+  --font-weight-black: 800;     /* display hero */
+
+  --line-height-tight: 1.1;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.7;
+
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.08em;
+
+  /* ---------- Layout ---------- */
+  --max-width-content: 560px;   /* the app column */
+  --max-width-wide: 720px;
+  --max-width-page: 960px;
+  --measure: 34ch;              /* comfortable line for leads on phones */
+
+  --border-radius-sm: 10px;
+  --border-radius-md: 14px;
+  --border-radius-lg: 20px;
+  --border-radius-xl: 28px;
+  --border-radius-full: 999px;
+  --border-width: 2px;
+
+  /* Shadows: hard, offset "press" edges (tap-tap paint), never blurry glows */
+  --shadow-sm: 0 3px 0 var(--color-border-primary);
+  --shadow-md: 0 4px 0 var(--color-border-primary);
+  --shadow-lg: 0 5px 0 var(--color-border-strong);
+  --shadow-accent: 0 4px 0 var(--color-accent-primary-active);
+  --shadow-focus: 0 0 0 3px var(--color-border-focus);
+
+  /* ---------- Components ---------- */
+  --touch-min: 44px;
+  --button-height: 52px;
+  --button-height-lg: 56px;
+  --tabbar-height: 64px;
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 28px;
+  --icon-xl: 44px;
+
+  /* ---------- Motion ---------- */
+  --duration-instant: 50ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --duration-slower: 600ms;
+  --easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-in: cubic-bezier(0.4, 0, 1, 1);
+  --easing-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-bounce: cubic-bezier(0.34, 1.56, 0.64, 1); /* victory moments only */
+
+  color-scheme: light;
+}
+
+/* Dark: cool night navy (not inverted), off-white text, lighter accents for contrast,
+   no press shadows on dark surfaces (they read as dirt). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-brand-blue: #7c92ff; --color-brand-red: #ff5a76; --color-brand-sun: #ffc83d; --color-brand-leaf: #3fd38a;
+    --color-brand-blue-soft: #1b2457; --color-brand-red-soft: #3a1424; --color-brand-sun-soft: #352a0b; --color-brand-leaf-soft: #0d2c1e;
+    --color-brand-sun-ink: #ffd76a; --color-brand-sun-icon: #ffc83d;
+    --color-bg-primary: #090d22; --color-bg-secondary: #121839; --color-bg-tertiary: #1a2148; --color-bg-inverse: #e8ebfa;
+    --color-text-primary: #e8ebfa; --color-text-secondary: #a6acd2; --color-text-tertiary: #737aa3; --color-text-inverse: #090d22;
+    --color-text-link: #8fa2ff; --color-text-on-accent: #070b20;
+    --color-border-primary: #252d5c; --color-border-secondary: #1a2148; --color-border-strong: #a6acd2; --color-border-focus: #8fa2ff;
+    --color-accent-primary: #7c92ff; --color-accent-primary-hover: #8fa2ff; --color-accent-primary-active: #4f66e6;
+    --color-accent-secondary: #1b2457; --color-accent-secondary-text: #a9b7ff;
+    --color-status-success: #4fdc93; --color-status-success-bg: #0e2c1d; --color-status-warning: #ffc83d; --color-status-warning-bg: #352a0b;
+    --color-status-error: #ff7a90; --color-status-error-bg: #3a1422; --color-status-info: #8fa2ff; --color-status-info-bg: #1b2457;
+    --color-surface-overlay: rgba(0, 0, 0, 0.6);
+    --shadow-sm: 0 2px 0 rgba(0, 0, 0, 0.35); --shadow-md: 0 3px 0 rgba(0, 0, 0, 0.4); --shadow-lg: 0 4px 0 rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --color-brand-blue: #7c92ff; --color-brand-red: #ff5a76; --color-brand-sun: #ffc83d; --color-brand-leaf: #3fd38a;
+  --color-brand-blue-soft: #1b2457; --color-brand-red-soft: #3a1424; --color-brand-sun-soft: #352a0b; --color-brand-leaf-soft: #0d2c1e;
+  --color-brand-sun-ink: #ffd76a; --color-brand-sun-icon: #ffc83d;
+  --color-bg-primary: #090d22; --color-bg-secondary: #121839; --color-bg-tertiary: #1a2148; --color-bg-inverse: #e8ebfa;
+  --color-text-primary: #e8ebfa; --color-text-secondary: #a6acd2; --color-text-tertiary: #737aa3; --color-text-inverse: #090d22;
+  --color-text-link: #8fa2ff; --color-text-on-accent: #070b20;
+  --color-border-primary: #252d5c; --color-border-secondary: #1a2148; --color-border-strong: #a6acd2; --color-border-focus: #8fa2ff;
+  --color-accent-primary: #7c92ff; --color-accent-primary-hover: #8fa2ff; --color-accent-primary-active: #4f66e6;
+  --color-accent-secondary: #1b2457; --color-accent-secondary-text: #a9b7ff;
+  --color-status-success: #4fdc93; --color-status-success-bg: #0e2c1d; --color-status-warning: #ffc83d; --color-status-warning-bg: #352a0b;
+  --color-status-error: #ff7a90; --color-status-error-bg: #3a1422; --color-status-info: #8fa2ff; --color-status-info-bg: #1b2457;
+  --color-surface-overlay: rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 2px 0 rgba(0, 0, 0, 0.35); --shadow-md: 0 3px 0 rgba(0, 0, 0, 0.4); --shadow-lg: 0 4px 0 rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0ms; --duration-fast: 0ms; --duration-normal: 0ms; --duration-slow: 0ms; --duration-slower: 0ms;
+  }
+}

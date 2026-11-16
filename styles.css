@@ -2,52 +2,32 @@
    (bann tap-tap la sou akèy la ak sou kat pwochen leson an).
    Polis: Bricolage Grotesque pou tit yo, Atkinson Hyperlegible pou tèks
    (fèt pou moun li fasil, menm sou ti ekran nan solèy). */
-@font-face { font-family: "Bricolage Grotesque"; src: url("fonts/bricolage-grotesque.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
-@font-face { font-family: "Atkinson Hyperlegible"; src: url("fonts/atkinson-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Atkinson Hyperlegible"; src: url("fonts/atkinson-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
-
+/* Short names used by the components, mapped to tokens.css (semantic tokens). */
 :root {
-  --paper: #f2f4fa;
-  --surface: #ffffff;
-  --ink: #0d1333;
-  --ink-2: #555d84;
-  --line: #dce1ef;
-  --blue: #0b2bb8;
-  --blue-press: #061a7a;
-  --blue-soft: #e5eaff;
-  --red: #d21034;
-  --red-soft: #fde6ea;
-  --sun: #f2a900;
-  --sun-soft: #fff3cf;
-  --leaf: #0b8a4c;
-  --leaf-soft: #e1f5ea;
-  --ok: #0b7a43;
-  --ok-soft: #dff4e8;
-  --bad: #b8173a;
-  --bad-soft: #fde7ec;
-  --on-blue: #ffffff;
-  --font-display: "Bricolage Grotesque", "Arial Rounded MT Bold", system-ui, sans-serif;
-  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --r-sm: 10px;
-  --r-md: 14px;
-  --r-lg: 20px;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #090d22; --surface: #121839; --ink: #eef1ff; --ink-2: #a6acd2; --line: #252d5c;
-    --blue: #7c92ff; --blue-press: #4f66e6; --blue-soft: #1b2457; --red: #ff5a76; --red-soft: #3a1424;
-    --sun: #ffc83d; --sun-soft: #352a0b; --leaf: #3fd38a; --leaf-soft: #0d2c1e;
-    --ok: #4fdc93; --ok-soft: #0e2c1d; --bad: #ff7a90; --bad-soft: #3a1422; --on-blue: #070b20;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --paper: #090d22; --surface: #121839; --ink: #eef1ff; --ink-2: #a6acd2; --line: #252d5c;
-  --blue: #7c92ff; --blue-press: #4f66e6; --blue-soft: #1b2457; --red: #ff5a76; --red-soft: #3a1424;
-  --sun: #ffc83d; --sun-soft: #352a0b; --leaf: #3fd38a; --leaf-soft: #0d2c1e;
-  --ok: #4fdc93; --ok-soft: #0e2c1d; --bad: #ff7a90; --bad-soft: #3a1422; --on-blue: #070b20;
-  color-scheme: dark;
+  --paper: var(--color-bg-primary);
+  --surface: var(--color-bg-secondary);
+  --ink: var(--color-text-primary);
+  --ink-2: var(--color-text-secondary);
+  --line: var(--color-border-primary);
+  --blue: var(--color-accent-primary);
+  --blue-press: var(--color-accent-primary-active);
+  --blue-soft: var(--color-accent-secondary);
+  --red: var(--color-brand-red);
+  --red-soft: var(--color-brand-red-soft);
+  --sun: var(--color-brand-sun);
+  --sun-soft: var(--color-brand-sun-soft);
+  --leaf: var(--color-brand-leaf);
+  --leaf-soft: var(--color-brand-leaf-soft);
+  --ok: var(--color-status-success);
+  --ok-soft: var(--color-status-success-bg);
+  --bad: var(--color-status-error);
+  --bad-soft: var(--color-status-error-bg);
+  --on-blue: var(--color-text-on-accent);
+  --font-display: var(--font-family-display);
+  --font-body: var(--font-family-body);
+  --r-sm: var(--border-radius-sm);
+  --r-md: var(--border-radius-md);
+  --r-lg: var(--border-radius-lg);
 }
 
 * { box-sizing: border-box; }
