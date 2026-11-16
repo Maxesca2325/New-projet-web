@@ -524,7 +524,7 @@ function profileTab() {
       <p class="note ${canListen ? 'ok' : ''}">${ic('mic')}<span>${canListen ? 'Egzèsis pale yo mache.' : 'Egzèsis pale yo mache sèlman nan Chrome (Android) ak Safari (iPhone). Ou ka sote yo.'}</span></p>
     </section>
     <button class="quiet-link" data-reset>Efase tout pwogrè mwen</button>
-    <p class="foot-note muted small">Koze v0.3 · Tout pwogrè ou rete sou telefòn ou.</p>`, { title: 'Pwofil' });
+    <p class="foot-note muted small">Koze v0.4 · Tout pwogrè ou rete sou telefòn ou.</p>`, { title: 'Pwofil' });
   $$('[data-edit]').forEach((a) => (a.onclick = () => { draft = null; }));
   $('[data-sfx]').onclick = (e) => {
     const on = !sfxOn();
@@ -930,7 +930,16 @@ document.addEventListener('keydown', (e) => {
 // ================================================================ demaraj
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  // Lè yon nouvo vèsyon pran kontwòl, rechaje yon sèl fwa pou moun nan jwenn li touswit
+  // (yon leson an kou rekòmanse kote l te ye, gras a sessionStorage).
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloading) return;
+    reloading = true;
+    location.reload();
+  });
+  navigator.serviceWorker.register('sw.js').then((r) => r.update()).catch(() => {});
 }
 
 render();
