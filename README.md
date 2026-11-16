@@ -1,0 +1,68 @@
+# Koze — Aprann anglè an kreyòl
+
+Koze se yon aplikasyon pou ayisyen aprann anglè **an kreyòl**, ak leson ki swiv **aktivite yo chwazi**:
+💻 Biznis online · 🎓 Etid · ✈️ Vwayaj · 🏠 Lavi chak jou · 🏗️ Konstriksyon · 🩺 Swen sante.
+
+## Sa ki ladan l (v0.1)
+
+- **Premye fwa**: 4 kesyon (poukisa, ki aktivite, ki nivo, konbyen minit pa jou). Apre sa, app la fè yon chemen pou moun nan: *Baz* → leson aktivite li yo youn apre lòt.
+- **15 leson, 90 fraz**: 3 leson baz + 2 leson pou chak aktivite.
+- **Pwononsyasyon ekri an kreyòl** pou chak fraz (*Thank you* → **Tènk yu**).
+- **Fason leson an mache** (5–10 minit):
+  1. 🎬 Sitiyasyon + objektif (« Apre leson sa a, ou ap ka… »)
+  2. ✨ Aprann 2 fraz alafwa, epi tcheke yo touswit
+  3. ✍️ Pratike: koute, chwazi, mete mo yo nan lòd, ekri. Egzèsis yo vin pi difisil selon nivo moun nan.
+  4. 🎤 Pale nan mikwofòn (Chrome sou Android, Safari sou iPhone)
+  5. Chak fraz ou rate tounen nan fen leson an
+- **Repetisyon espase**: fraz yo tounen pou revizyon apre 1, 3, 7, 14, 30 jou.
+- **Motivasyon**: XP, objektif chak jou, seri 🔥.
+- **Mache san entènèt**, ou ka enstale l sou telefòn nan. Pa gen kont, tout pwogrè rete sou telefòn nan.
+- Mòd lannwit otomatik.
+
+## Kijan pou w teste l sou òdinatè
+
+```bash
+python3 -m http.server 8000
+# louvri http://localhost:8000
+```
+
+## Mete l sou entènèt gratis (GitHub Pages)
+
+1. Sou GitHub: **Settings → Pages**
+2. *Source*: **Deploy from a branch**, chwazi branch la ak dosye `/ (root)`, epi **Save**
+3. Apre 1–2 minit, app la ap disponib sou `https://maxesca2325.github.io/New-projet-web/`
+
+Lè ou pibliye yon nouvo vèsyon, chanje `VERSION` nan `sw.js` pou telefòn yo telechaje l.
+
+## Ajoute oswa korije leson
+
+Tout kontni an nan `js/data.js`. Chak fraz gen 3 pati:
+
+```js
+['Thank you very much.', 'Mèsi anpil.', 'Tènk yu vèri moch.'],
+//  anglè                  kreyòl         pwononsyasyon an kreyòl
+```
+
+> ⚠️ **Yon moun ki pale kreyòl natif natal dwe revize tout fraz kreyòl yo anvan lansman.**
+
+## Fichye yo
+
+| Fichye | Wòl |
+|---|---|
+| `index.html`, `styles.css` | Paj la ak style la |
+| `js/app.js` | Ekran yo: premye fwa, akèy, leson, pwofil |
+| `js/data.js` | Chemen yo ak leson yo |
+| `js/lesson.js` | Kijan yon leson oswa yon revizyon konstwi |
+| `js/srs.js` | Repetisyon espase |
+| `js/speech.js` | Vwa anglè ak mikwofòn |
+| `js/store.js` | Sove pwogrè sou telefòn nan |
+| `sw.js`, `manifest.webmanifest` | Mache san entènèt, enstale sou telefòn |
+
+## Pwochen etap
+
+- [ ] Revizyon kreyòl pa yon moun ki pale l natif natal
+- [ ] Plis leson (objektif: 10 leson pou chak aktivite)
+- [ ] Odyo anglè ak vwa natirèl (Kokoro) olye vwa telefòn nan
+- [ ] Kont + senkronizasyon ant aparèy yo
+- [ ] Premium: IA k ap jwe wòl (patwon, kliyan, pasyan), tout leson, san piblisite
+- [ ] Peman: kat (dyaspora) + MonCash

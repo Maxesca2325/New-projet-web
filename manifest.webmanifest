@@ -1,0 +1,16 @@
+{
+  "name": "Koze — Aprann anglè an kreyòl",
+  "short_name": "Koze",
+  "description": "Aprann anglè vit, an kreyòl, ak leson ki swiv lavi ou.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f6fb",
+  "theme_color": "#1736b8",
+  "lang": "ht",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
