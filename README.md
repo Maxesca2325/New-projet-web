@@ -70,7 +70,7 @@ Tout kontni an nan `js/data.js`. Chak fraz gen 3 pati:
 
 - [ ] Revizyon kreyòl pa yon moun ki pale l natif natal
 - [ ] Plis leson (objektif: 10 leson pou chak aktivite)
-- [ ] Odyo anglè ak vwa natirèl (Kokoro) olye vwa telefòn nan
+- [x] Odyo anglè ak vwa natirèl (ElevenLabs « Sarah » via ai33, ~2,5 mo/s)
 - [ ] Kont + senkronizasyon ant aparèy yo
 - [ ] Premium: IA k ap jwe wòl (patwon, kliyan, pasyan), tout leson, san piblisite
 - [ ] Peman: kat (dyaspora) + MonCash

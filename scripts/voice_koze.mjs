@@ -1,6 +1,6 @@
 // Odyo anglè pou chak fraz Koze, ak yon vwa ai33.pro (ElevenLabs "Sarah" pa defo; Kokoro mache tou).
 //   node scripts/voice_koze.mjs [voice_id] [speed]     default: elevenlabs_EXAVITQu4vr4xnSDxMaL (Sarah) 0.85 (pa twò vit pou moun k ap aprann)
-// Ekri audio/<leson>-<n>.mp3 (mono, 48 kbps, san silans nan kòmansman ak nan fen).
+// Ekri audio/<leson>-<n>.mp3 (mono, 48 kbps, san silans nan kòmansman ak nan fen, ~2.4 mo/s maks).
 // Li sote fraz ki deja fèt ak menm tèks + menm vwa (audio/index.json), kidonk
 // relanse l apre w ajoute fraz sèlman peye pou nouvo yo.
 // Kle API: sou anviwònman cloud la, proxy a mete l. Sou pwòp òdinatè ou:
@@ -34,6 +34,18 @@ const curl = (args) => {
   }
 };
 
+// Pa twò rapid pou moun k ap aprann: si fraz la depase ~2.4 mo/segonn, nou ralanti l
+// (atempo kenbe menm ton vwa a), men pa plis pase 25 % pou l rete natirèl.
+const TARGET_WPS = 2.4;
+function slowDown(file, text) {
+  const d = Number(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", file]).toString());
+  const f = Math.max(0.75, Math.min(1, TARGET_WPS / (text.split(/\s+/).length / d)));
+  if (f > 0.99) return;
+  const tmp = `${file}.tmp.mp3`;
+  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", file, "-af", `atempo=${f.toFixed(3)}`, "-ac", "1", "-ar", "24000", "-b:a", "48k", tmp]);
+  fs.renameSync(tmp, file);
+}
+
 const items = LESSONS.flatMap((l) => l.items);
 const fileOf = (it) => `${it.id.replace(".", "-")}.mp3`;
 const key = (it) => `${voice}|${speed}|${it.en}`;
@@ -61,6 +73,7 @@ while (todo.some((it) => !it.done)) {
     execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", raw,
       "-af", "silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.03,areverse,silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.08,areverse,loudnorm=I=-16:TP=-1.5:LRA=11",
       "-ac", "1", "-ar", "24000", "-b:a", "48k", path.join(OUT, fileOf(it))]);
+    slowDown(path.join(OUT, fileOf(it)), it.en);
     index[fileOf(it)] = key(it);
     credits += d.credit_cost || 0;
     it.done = true;
