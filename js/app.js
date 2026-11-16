@@ -94,7 +94,10 @@ function welcome() {
   <section class="welcome">
     ${wordmark(true)}
     ${STRIPES}
-    <h1 class="hero">Pale anglè.<br>Aprann li <em>an kreyòl.</em></h1>
+    <div class="hero-row">
+      <h1 class="hero">Pale anglè.<br>Aprann li <em>an kreyòl.</em></h1>
+      <img class="maskot" src="img/maskot.webp" width="480" height="463" alt="Ti zwazo Koze a, yon trogon, zwazo nasyonal Ayiti">
+    </div>
     <p class="lead">Leson 5 a 10 minit ki swiv lavi ou: biznis, lekòl, vwayaj, chantye, lopital.</p>
     <div class="sample" aria-label="Egzanp yon fraz">
       <div class="sample-row"><span class="lang">EN</span><span class="en">Thank you very much.</span>
@@ -531,7 +534,7 @@ function run({ kind, lesson, steps, items }) {
     const acc = firstTries ? Math.round((firstOk / firstTries) * 100) : 100;
     view(`
     <section class="screen done">
-      <div class="medal">${ic(acc >= 80 ? 'trophy' : 'party-popper')}</div>
+      <img class="maskot done-maskot" src="img/maskot.webp" width="480" height="463" alt="">
       <h1>${kind === 'lesson' ? 'Leson fini!' : 'Revizyon fini!'}</h1>
       ${kind === 'lesson' ? `<p class="scene">Kounye a ou ka ${esc(lesson.objektif)}</p>` : '<p class="scene">Memwa w ap vin pi fò chak jou.</p>'}
       <div class="stat-row">

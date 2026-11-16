@@ -114,6 +114,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* ---------- akèy premye fwa ---------- */
 .welcome { min-height: 100dvh; display: flex; flex-direction: column; gap: 22px; padding-block: 28px 8px; }
 .welcome .hero { font-size: clamp(2.3rem, 10vw, 3.1rem); line-height: 1.02; font-weight: 800; }
+.hero-row { display: flex; align-items: flex-end; gap: 8px; }
+.hero-row .hero { flex: 1; min-width: 0; }
+.maskot { display: block; height: auto; max-width: 100%; }
+.hero-row .maskot { width: clamp(104px, 30vw, 150px); margin-bottom: -6px; }
+.done-maskot { width: 150px; }
 .welcome .hero em { font-style: normal; color: var(--blue); }
 .welcome .lead { font-size: 1.12rem; color: var(--ink-2); max-width: 34ch; }
 .sample { background: var(--surface); border: 2px solid var(--line); border-radius: var(--r-lg); padding: 16px; display: grid; gap: 8px; }

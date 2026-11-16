@@ -75,6 +75,16 @@ Tout kontni an nan `js/data.js`. Chak fraz gen 3 pati:
   - *Bricolage Grotesque* pou tit yo
   - *Atkinson Hyperlegible* pou tèks la. Li fèt pou moun li fasil, menm sou yon ti ekran nan solèy.
 - **Ikòn**: [Lucide](https://lucide.dev) (lisans ISC), nan `js/icons.js`.
+- **Maskòt**: yon trogon, zwazo nasyonal Ayiti a (`img/maskot.webp`), kreye ak ai33.pro (gpt-image-2).
 - Mòd lannwit otomatik.
+
+### Kreye imaj ak ai33.pro
+
+```bash
+export AI33_API_KEY=...   # sou pwòp òdinatè ou sèlman; pa janm mete kle a nan yon fichye
+node scripts/image_ai33.mjs scripts/koze-prompts.json out/
+```
+
+Chak imaj nan `scripts/koze-prompts.json` gen yon `model` (egzanp `recraft-v4` pou logo, `gpt-image-2` pou ilistrasyon), yon `prompt` ak yon `aspect_ratio`.
 
 Polis yo gen lisans SIL Open Font License.

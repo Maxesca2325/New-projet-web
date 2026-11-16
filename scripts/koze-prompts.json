@@ -1,0 +1,17 @@
+[
+  {
+    "name": "logo",
+    "model": "recraft-v4",
+    "n": 2,
+    "aspect_ratio": "1:1",
+    "prompt": "Flat vector app icon logo for 'Koze', a language learning app for Haitians. A single rounded speech bubble with a small tail at bottom left, the bubble split horizontally: deep royal blue (#0B2BB8) top half, vivid red (#D21034) bottom half like the Haitian flag. A bold, friendly, rounded white lowercase letter 'k' centered inside the bubble. Clean geometric shapes, no gradients, no shadows, no text other than the k, centered on a plain very light grey-blue background (#F2F4FA). Minimal, memorable, works at small sizes, professional brand quality."
+  },
+  {
+    "name": "maskot",
+    "model": "gpt-image-2",
+    "n": 1,
+    "aspect_ratio": "1:1",
+    "quality": "medium",
+    "prompt": "Friendly mascot character for 'Koze', a mobile app that teaches Haitians to speak English. A cute, round, cheerful Hispaniolan trogon bird (Haiti's national bird: emerald-green back, grey chest, bright red belly, blue-grey tail) standing and waving one wing, with a small white speech bubble next to it. Flat 2D vector illustration style like a modern app mascot: simple shapes, thick clean outlines, soft flat colors, big expressive eyes, no gradients, no text. Plain solid off-white background (#F2F4FA), full body, centered, generous margins."
+  }
+]
