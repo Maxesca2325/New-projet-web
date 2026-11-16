@@ -83,18 +83,31 @@ export function preload(texts) {
 const SR = typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
 export const canListen = !!SR;
 
-// Retounen yon lis sa navigatè a kwè moun nan di.
-export function listen() {
-  return new Promise((resolve, reject) => {
-    stopSpeaking();
-    const r = new SR();
-    r.lang = 'en-US';
-    r.interimResults = false;
-    r.maxAlternatives = 5;
-    let finished = false;
-    r.onresult = (e) => { finished = true; resolve([...e.results[0]].map((a) => a.transcript)); };
-    r.onerror = (e) => { if (!finished) { finished = true; reject(e.error); } };
-    r.onend = () => { if (!finished) { finished = true; resolve([]); } };
-    r.start();
+// Koute moun nan. Retounen { done: Promise<string[]>, stop() }.
+// onInterim(tèks) montre sa navigatè a ap tande pandan moun nan ap pale.
+// Erè yo (rejeksyon done): 'not-allowed', 'network', 'no-speech', 'audio-capture', 'timeout'…
+export function listen({ onInterim, maxMs = 9000 } = {}) {
+  stopSpeaking();
+  const r = new SR();
+  r.lang = 'en-US';
+  r.interimResults = true;
+  r.continuous = false;
+  r.maxAlternatives = 5;
+  let finished = false;
+  let interim = '';
+  let timer;
+  const done = new Promise((resolve, reject) => {
+    const end = (fn, v) => { if (!finished) { finished = true; clearTimeout(timer); fn(v); } };
+    r.onresult = (e) => {
+      const res = e.results[e.results.length - 1];
+      if (res.isFinal) end(resolve, [...res].map((a) => a.transcript));
+      else { interim = res[0].transcript; onInterim?.(interim); }
+    };
+    r.onerror = (e) => end(reject, e.error || 'unknown');
+    // Kèk telefòn fini san rezilta final: nou pran sa nou te tande.
+    r.onend = () => end(resolve, interim ? [interim] : []);
+    timer = setTimeout(() => { try { r.stop(); } catch { /* */ } }, maxMs);
   });
+  try { r.start(); } catch (e) { return { done: Promise.reject('start'), stop() {} }; }
+  return { done, stop: () => { try { r.stop(); } catch { /* */ } } };
 }

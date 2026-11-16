@@ -47,15 +47,40 @@ export function typedMatch(input, target) {
   return lev(a, b) <= Math.max(1, Math.floor(b.length * 0.08)) ? 'close' : 'wrong';
 }
 
-// Pi bon pousantaj mo nou rekonèt nan sa moun nan di (0..1).
-export function spokenScore(alternatives, target) {
-  const t = norm(target).split(' ');
-  let best = 0;
+// Chif an mo, paske rekonesans vwa a ekri "10" pou "ten".
+const ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
+  'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+const numWords = (n) => (n < 20 ? ONES[n] : n < 100 ? `${TENS[Math.floor(n / 10)]}${n % 10 ? ' ' + ONES[n % 10] : ''}` : String(n));
+const spokenWords = (s) => norm(String(s).replace(/\$(\d+)/g, '$1 dollars'))
+  .replace(/\b\d{1,2}\b/g, (d) => numWords(+d))
+  .split(' ').filter(Boolean);
+
+// Yon mo konte si li prèske menm (aksan, yon lèt diferan): "pain" ≈ "pen".
+function close(a, b) {
+  if (a === b) return true;
+  const n = Math.max(a.length, b.length);
+  if (n <= 2) return false;
+  return lev(a, b) <= (n >= 6 ? 2 : 1);
+}
+
+// Konbyen mo nan fraz la moun nan di (0..1), ak ki mo ki pase, pou chak sa navigatè a tande.
+export function spokenMatch(alternatives, target) {
+  const t = spokenWords(target);
+  let best = { score: 0, hits: t.map(() => false), heard: alternatives[0] || '' };
   for (const alt of alternatives) {
-    const said = new Set(norm(alt).split(' '));
-    best = Math.max(best, t.filter((w) => said.has(w)).length / t.length);
+    const said = spokenWords(alt);
+    const used = new Set();
+    const hits = t.map((w) => {
+      const i = said.findIndex((x, k) => !used.has(k) && close(w, x));
+      if (i < 0) return false;
+      used.add(i);
+      return true;
+    });
+    const score = hits.filter(Boolean).length / t.length;
+    if (score > best.score) best = { score, hits, heard: alt };
   }
-  return best;
+  return { ...best, words: words(target) };
 }
 
 export const words = (s) => s.replace(/[.,!?]/g, '').split(/\s+/).filter(Boolean);

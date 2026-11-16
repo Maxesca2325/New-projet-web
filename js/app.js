@@ -3,7 +3,7 @@ import * as store from './store.js';
 import { grade, dueIds, MASTERED_BOX } from './srs.js';
 import { say, canSpeak, canListen, listen, setAudioIndex, preload, stopSpeaking } from './speech.js';
 import { buildLesson, buildReview } from './lesson.js';
-import { esc, shuffle, pick, typedMatch, spokenScore, norm, words } from './util.js';
+import { esc, shuffle, pick, typedMatch, spokenMatch, norm, words } from './util.js';
 import { SPRITE } from './icons.js';
 
 document.body.insertAdjacentHTML('afterbegin', SPRITE);
@@ -749,9 +749,18 @@ function run({ kind, lesson, steps, items }) {
   }
 
   // --- Pale
+  // Nou aksepte 60 % mo yo, ak mo ki prèske menm (aksan). Apre 2 esè, moun nan ka toujou kontinye.
+  const MIC_ERR = {
+    'not-allowed': 'Koze pa gen dwa sèvi ak mikwofòn nan. Peze kadna a bò adrès sit la (oswa Paramèt → Sit → Mikwofòn) epi pèmèt li.',
+    'service-not-allowed': 'Navigatè sa a pa kite Koze sèvi ak mikwofòn nan. Eseye ak Chrome (Android) oswa Safari (iPhone).',
+    network: 'Pou tande w, telefòn nan bezwen entènèt. Konekte w epi eseye ankò, oswa kontinye san pale.',
+    'no-speech': 'Nou pa tande anyen. Pale pi fò, pi pre telefòn nan.',
+    'audio-capture': 'Nou pa jwenn mikwofòn nan. Tcheke si yon lòt app ap sèvi ak li.',
+  };
   function speak(st) {
     const { item } = st;
     let tries = 0;
+    let rec = null;
     frame(`
       <p class="instr">${ic('mic')} Di fraz sa a byen fò.</p>
       <div class="card phrase">
@@ -760,40 +769,56 @@ function run({ kind, lesson, steps, items }) {
         ${canSpeak ? `<div class="say-row"><button class="btn ghost" data-say>${ic('volume-2')} Koute anvan</button></div>` : ''}
       </div>
       <button class="mic" data-mic aria-label="Peze pou w pale">${ic('mic')}</button>
-      <p class="heard muted center" aria-live="polite">Peze mikwofòn nan epi pale.</p>`,
+      <div class="heard center" aria-live="polite"><p class="muted">Peze mikwofòn nan, epi di fraz la.</p></div>`,
     `<button class="btn ghost big" data-skip>Mwen pa ka pale kounye a</button>`);
+    const heard = (html) => { $('.heard').innerHTML = html; };
     $('[data-say]')?.addEventListener('click', () => say(item.en));
-    $('[data-skip]').onclick = advance; // pa pini moun nan si li pa ka pale
-    $('[data-mic]').onclick = async () => {
-      const mic = $('[data-mic]');
+    $('[data-skip]').onclick = () => { rec?.stop(); advance(); }; // pa pini moun nan si li pa ka pale
+    const mic = $('[data-mic]');
+    mic.onclick = async () => {
+      if (rec) { rec.stop(); return; } // dezyèm klik: kanpe
+      if (navigator.onLine === false) return heard(`<p class="mic-err">${MIC_ERR.network}</p>`);
       mic.classList.add('on');
-      $('.heard').textContent = 'M ap koute…';
+      mic.setAttribute('aria-label', 'Peze pou w kanpe');
+      heard('<p class="listening">M ap koute… pale kounye a.</p>');
+      rec = listen({ onInterim: (t) => heard(`<p class="listening">« ${esc(t)} »</p>`) });
       let alts = [];
-      try { alts = await listen(); } catch (e) {
-        mic.classList.remove('on');
-        $('.heard').textContent = e === 'not-allowed'
-          ? 'Koze pa gen dwa sèvi ak mikwofòn nan. Louvri paramèt navigatè a pou w pèmèt li, oswa sote egzèsis la.'
-          : 'Mikwofòn nan pa mache kounye a. Eseye ankò oswa sote egzèsis la.';
-        return;
+      try { alts = await rec.done; } catch (e) {
+        heard(`<p class="mic-err">${MIC_ERR[e] || 'Mikwofòn nan pa mache kounye a. Eseye ankò, oswa kontinye san pale.'}</p>`);
+        return reset();
       }
-      mic.classList.remove('on');
+      reset();
+      if (!alts.length) return heard(`<p class="mic-err">${MIC_ERR['no-speech']}</p>`);
       tries += 1;
-      const score = spokenScore(alts, item.en);
-      if (score >= 0.75) {
+      const m = spokenMatch(alts, item.en);
+      const colored = m.hits.length === m.words.length
+        ? m.words.map((w, i) => `<span class="${m.hits[i] ? 'hit' : 'miss'}">${esc(w)}</span>`).join(' ')
+        : esc(m.heard);
+      if (m.score >= 0.6) {
         xp += 10;
         vibrate(25);
+        heard(`<p class="said">${colored}</p>`);
         $('.run-foot').innerHTML = `<div class="fb ok">
-          <div class="fb-head">${maskot('kontan', 'fb-maskot')}<div><p class="fb-title">${ic('mic')}${pick(PRAISE)}</p>
-          <p class="fb-label">Nou tande: "${esc(alts[0] || '')}"</p></div></div>
+          <div class="fb-head">${maskot('kontan', 'fb-maskot')}<div><p class="fb-title">${ic('mic')}${m.score === 1 ? pick(PRAISE) : 'Byen di!'}</p>
+          <p class="fb-label">Telefòn nan konprann ${Math.round(m.score * 100)}% fraz la.</p></div></div>
           <button class="btn primary big" data-continue>Kontinye</button></div>`;
         $('[data-continue]').onclick = advance;
         $('[data-continue]').focus();
       } else {
-        $('.heard').innerHTML = alts[0]
-          ? `Nou tande: "<i>${esc(alts[0])}</i>". ${tries < 3 ? 'Eseye ankò, pale klè epi pa twò vit.' : 'Pa gen pwoblèm, w ap pratike l ankò pita.'}`
-          : 'Nou pa tande anyen. Eseye ankò, pi pre telefòn nan.';
+        heard(`<p class="said">${colored}</p>
+          <p class="muted small">Nou tande: « ${esc(m.heard)} ». Mo ki an gri yo pa t klè. ${tries < 2 ? 'Koute ankò, epi eseye ankò dousman.' : 'Pa gen pwoblèm: w ap pratike fraz sa a ankò pita.'}</p>`);
+        if (tries >= 2) {
+          const b = $('[data-skip]');
+          b.textContent = 'Kontinye';
+          b.className = 'btn primary big';
+        }
       }
     };
+    function reset() {
+      rec = null;
+      mic.classList.remove('on');
+      mic.setAttribute('aria-label', 'Peze pou w pale');
+    }
   }
 
   // --- Fen: fèt

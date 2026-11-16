@@ -1,6 +1,6 @@
 // Koze mache san entènèt: nou kenbe fichye app la sou telefòn nan.
 // Chanje VERSION chak fwa ou pibliye yon nouvo vèsyon.
-const VERSION = 'koze-v7';
+const VERSION = 'koze-v8';
 const ASSETS = [
   './', './index.html', './tokens.css', './styles.css', './manifest.webmanifest',
   './js/app.js', './js/icons.js', './js/data.js', './js/lesson.js', './js/srs.js', './js/speech.js', './js/store.js', './js/util.js',
