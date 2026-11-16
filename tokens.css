@@ -4,9 +4,8 @@
    See .design/koze/DESIGN_BRIEF.md and .design/koze/DESIGN_TOKENS.md.
    Every component uses these tokens; no raw values in styles.css. */
 
-@font-face { font-family: "Bricolage Grotesque"; src: url("fonts/bricolage-grotesque.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
-@font-face { font-family: "Atkinson Hyperlegible"; src: url("fonts/atkinson-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Atkinson Hyperlegible"; src: url("fonts/atkinson-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+/* Nunito: rounded sans without serifs, chosen by the user. One variable file (200–1000). */
+@font-face { font-family: "Nunito"; src: url("fonts/nunito.woff2") format("woff2"); font-weight: 200 1000; font-display: swap; }
 
 /* Breakpoints (for media queries; CSS variables cannot be used inside them):
    sm 375px · md 768px · lg 1024px · xl 1280px · 2xl 1536px
@@ -81,12 +80,12 @@
   --space-12: 256px;
 
   /* ---------- Typography ---------- */
-  --font-family-display: "Bricolage Grotesque", "Arial Rounded MT Bold", system-ui, sans-serif;
-  --font-family-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-family-display: "Nunito", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --font-family-body: "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-family-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
-  --font-size-xs: 0.8125rem;    /* 13px  labels, eyebrows */
-  --font-size-sm: 0.9375rem;    /* 15px  secondary text */
+  --font-size-xs: 0.8125rem;    /* 13px  tags (EN/KR), tab labels, option numbers only */
+  --font-size-sm: 1rem;         /* 16px  secondary text: never smaller for beginner readers */
   --font-size-base: 1.0625rem;  /* 17px  body (never below 16px on phones) */
   --font-size-md: 1.1875rem;    /* 19px  lead, scene */
   --font-size-lg: 1.375rem;     /* 22px  section titles, feedback title */
@@ -95,17 +94,18 @@
   --font-size-3xl: 2.125rem;    /* 34px  phrase to learn */
   --font-size-4xl: clamp(2.4rem, 10vw, 3.1rem); /* welcome hero */
 
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;    /* display face only; Atkinson falls back to 400 */
-  --font-weight-semibold: 650;  /* display face */
-  --font-weight-bold: 700;
-  --font-weight-black: 800;     /* display hero */
+  --font-weight-normal: 500;
+  --font-weight-medium: 600;
+  --font-weight-semibold: 700;
+  --font-weight-bold: 800;
+  --font-weight-black: 900;     /* welcome hero only */
+  --font-weight-title: 850;     /* every screen and card title, one weight */
 
   --line-height-tight: 1.1;
   --line-height-normal: 1.5;
   --line-height-relaxed: 1.7;
 
-  --letter-spacing-tight: -0.02em;
+  --letter-spacing-tight: -0.015em;
   --letter-spacing-normal: 0;
   --letter-spacing-wide: 0.08em;
 

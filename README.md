@@ -82,9 +82,7 @@ Tout kontni an nan `js/data.js`. Chak fraz gen 3 pati:
 
 - **Koulè**: ble ak wouj drapo ayisyen an, plis jòn ak vè yon tap-tap. Bann koulè tap-tap la parèt sèlman sou akèy la ak sou kat pwochen leson an.
 - **Logo**: yon bil pawòl (koze) ble anlè, wouj anba, ak yon « k » blan (`icons/icon.svg`).
-- **Polis** (nan `fonts/`, mache san entènèt):
-  - *Bricolage Grotesque* pou tit yo
-  - *Atkinson Hyperlegible* pou tèks la. Li fèt pou moun li fasil, menm sou yon ti ekran nan solèy.
+- **Polis**: *Nunito* (nan `fonts/`, mache san entènèt), yon polis san serif, won, ki fasil pou li.
 - **Ikòn**: [Lucide](https://lucide.dev) (lisans ISC), nan `js/icons.js`.
 - **Maskòt**: yon trogon, zwazo nasyonal Ayiti a (`img/maskot.webp`), kreye ak ai33.pro (gpt-image-2).
 - Mòd lannwit otomatik.

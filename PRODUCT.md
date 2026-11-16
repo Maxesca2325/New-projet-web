@@ -37,7 +37,7 @@ Utilisée seule, sur téléphone, souvent dehors ou dans les transports, parfois
 ## Brand Commitments
 
 - Nom : **Koze** (« parler, causer » en créole). Interface en créole haïtien.
-- Conserver **la forme des textes** : la typographie actuelle (Bricolage Grotesque pour les titres, Atkinson Hyperlegible pour le texte) et l'étiquette « Di l konsa ».
+- **Police : Nunito** (sans sérif arrondie), choisie par l'utilisateur pour remplacer Bricolage + Atkinson : pas d'empattements. L'étiquette « Di l konsa » reste.
 - **Aucun style « fait par une IA »** : pas de dégradés décoratifs, d'émojis en guise d'icônes, de petits titres en capitales au-dessus des titres, de grilles de chiffres décoratives.
 - Logo, mascotte (trogon) et couleurs du drapeau existent mais ne sont pas obligatoires dans une refonte.
 

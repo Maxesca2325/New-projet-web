@@ -4,8 +4,8 @@
 // - Medya yo (odyo, imaj, polis): kopi a an premye, nan yon cache ki pa efase
 //   lè app la mete ajou, pou moun nan pa telechaje vwa yo ankò.
 // Chanje VERSION chak fwa ou pibliye yon nouvo vèsyon.
-const VERSION = 'koze-v13';
-const MEDIA = 'koze-media-v1';
+const VERSION = 'koze-v15';
+const MEDIA = 'koze-media-v2';
 const ASSETS = [
   './', './index.html', './tokens.css', './styles.css', './manifest.webmanifest',
   './js/app.js', './js/icons.js', './js/sfx.js', './js/data.js', './js/lesson.js', './js/srs.js', './js/speech.js', './js/store.js', './js/util.js',
@@ -14,7 +14,7 @@ const ASSETS = [
 const MEDIA_ASSETS = [
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png',
   './img/maskot.webp', './img/maskot-kontan.webp', './img/maskot-ankouraje.webp', './img/maskot-dodo.webp',
-  './fonts/bricolage-grotesque.woff2', './fonts/atkinson-400.woff2', './fonts/atkinson-700.woff2',
+  './fonts/nunito.woff2',
 ];
 
 self.addEventListener('install', (e) => {

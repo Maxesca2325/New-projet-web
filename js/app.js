@@ -249,7 +249,7 @@ function welcome() {
       <h1 class="hero">Pale anglè.<br>Aprann li <em>an kreyòl.</em></h1>
       ${maskot('bonjou', 'hero-maskot', 'Ti zwazo Koze a, yon trogon, zwazo nasyonal Ayiti')}
     </div>
-    <p class="lead">Leson 5 a 10 minit ki swiv lavi ou: biznis, lekòl, vwayaj, chantye, lopital.</p>
+    <p class="lead">Leson <span class="num">5</span> a <span class="num">10</span> minit ki swiv lavi ou: biznis, lekòl, vwayaj, chantye, lopital.</p>
     <div class="sample" aria-label="Egzanp yon fraz">
       <div class="sample-row"><span class="lang">EN</span><span class="en" translate="no" lang="en">Thank you very much.</span>
         ${canSpeak ? `<button class="mini-say" data-say aria-label="Koute">${ic('volume-2')}</button>` : ''}</div>
@@ -508,12 +508,12 @@ function profileTab() {
     <section class="panel">
       <h2>Pwogrè ou</h2>
       <div class="bar" role="progressbar" aria-label="Leson fini" aria-valuemin="0" aria-valuemax="${LESSONS.length}" aria-valuenow="${doneCount}"><i style="width:${Math.round((doneCount / LESSONS.length) * 100)}%"></i></div>
-      <p>${doneCount} leson fini sou ${LESSONS.length} · <b>${mastered}</b> fraz metrize · ${learning} fraz w ap aprann</p>
+      <p><span class="num">${doneCount}</span> leson fini sou <span class="num">${LESSONS.length}</span> · <b class="num">${mastered}</b> fraz metrize · <span class="num">${learning}</span> fraz w ap aprann</p>
     </section>
     <section class="panel">
       <h2>Chemen ou</h2>
       <ul class="my-paths">${p.paths.map((id) => `<li>${ptile(PATH.get(id), 'sm')}${esc(PATH.get(id).non)}</li>`).join('')}</ul>
-      <p class="muted"><b>Nivo:</b> ${esc(LEVELS.find((l) => l.id === p.level)?.label || '')} · <b>${p.minutes} minit</b> pa jou</p>
+      <p class="muted"><b>Nivo:</b> ${esc(LEVELS.find((l) => l.id === p.level)?.label || '')} · <b><span class="num">${p.minutes}</span> minit</b> pa jou</p>
       <div class="row">
         <a class="btn secondary" href="#kesyon-2" data-edit>Chanje chemen</a>
         <a class="btn ghost" href="#kesyon-1" data-edit>Chanje tout preferans yo</a>

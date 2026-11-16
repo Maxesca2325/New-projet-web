@@ -11,7 +11,7 @@ Fichier source : `tokens.css` (chargé avant `styles.css`). Philosophie : **Tap-
 - **Ombres** : pas de flou. Des « bords pressés » durs (0 3–5 px 0), comme de la peinture de tap-tap et des boutons qu'on enfonce. En sombre, ombres noires transparentes.
 - **Mode sombre** : bleu nuit froid (#090d22), texte blanc cassé (#e8ebfa), accents éclaircis pour garder le contraste ; texte sur bouton bleu = bleu très foncé (#070b20) au lieu de blanc.
 - **Mouvement** : `--easing-bounce` réservé aux moments de victoire ; `prefers-reduced-motion` met toutes les durées à 0.
-- **Typographie** : base 17 px (jamais < 16 px sur téléphone), échelle 13 → 34 px + hero fluide ; Atkinson n'a que 400/700, donc `medium`/`semibold` ne servent qu'à Bricolage.
+- **Typographie** : une seule famille, **Nunito** variable (200–1000), sans empattements (choix de l'utilisateur). Graisses montées d'un cran (texte 500, gras 800, titres 850, hero 900) car Nunito paraît fine sur petit écran. Base 17 px, texte secondaire ≥ 16 px.
 
 ## Contrastes vérifiés (WCAG)
 
