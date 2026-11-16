@@ -30,7 +30,8 @@ while (items.some((it) => !it.done)) {
   if (Date.now() - t0 > 10 * 60e3) throw new Error("tasks still not done after 10 minutes");
   await sleep(6000);
   for (const it of items.filter((x) => !x.done)) {
-    const d = curl([`${API}/v1/task/${it.task}`]);
+    let d;
+    try { d = curl([`${API}/v1/task/${it.task}`]); } catch (e) { continue; } // server busy (503): ask again next round
     if (/fail|error/i.test(d.status)) { it.done = true; console.log(`${it.name}: FAILED ${d.error_message || ""}`); continue; }
     if (d.status !== "done") continue;
     it.done = true;

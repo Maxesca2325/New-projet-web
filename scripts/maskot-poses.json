@@ -1,0 +1,23 @@
+[
+  {
+    "name": "kontan",
+    "model": "gpt-image-2",
+    "aspect_ratio": "1:1",
+    "quality": "medium",
+    "prompt": "App mascot: a cute, round, cheerful Hispaniolan trogon bird (Haiti's national bird) — emerald-green head and back, light grey chest with small scalloped feathers, bright red belly, dark grey wings with lighter edges, blue-grey striped tail, short yellow-orange beak, orange feet, big round black eyes with white highlights. Pose: jumping for joy with both wings raised high, eyes happily closed in a big smile, feet off the ground, two tiny motion lines under it. Flat 2D vector illustration like a modern app mascot: simple shapes, thick clean dark navy outlines, soft flat colors, no gradients, no text, no confetti. Plain solid off-white background (#F2F4FA), full body, centered, generous margins."
+  },
+  {
+    "name": "ankouraje",
+    "model": "gpt-image-2",
+    "aspect_ratio": "1:1",
+    "quality": "medium",
+    "prompt": "App mascot: a cute, round, friendly Hispaniolan trogon bird (Haiti's national bird) — emerald-green head and back, light grey chest with small scalloped feathers, bright red belly, dark grey wings with lighter edges, blue-grey striped tail, short yellow-orange beak, orange feet, big round black eyes with white highlights. Pose: standing, head slightly tilted, warm reassuring smile, one wing raised giving a gentle thumbs-up, like saying 'no problem, try again'. Flat 2D vector illustration like a modern app mascot: simple shapes, thick clean dark navy outlines, soft flat colors, no gradients, no text. Plain solid off-white background (#F2F4FA), full body, centered, generous margins."
+  },
+  {
+    "name": "dodo",
+    "model": "gpt-image-2",
+    "aspect_ratio": "1:1",
+    "quality": "medium",
+    "prompt": "App mascot: a cute, round Hispaniolan trogon bird (Haiti's national bird) — emerald-green head and back, light grey chest with small scalloped feathers, bright red belly, dark grey wings, blue-grey striped tail, short yellow-orange beak, orange feet. Pose: sitting peacefully and sleeping, eyes closed as two calm curved lines, content little smile, wings folded, three small navy 'z' letters floating above its head. Flat 2D vector illustration like a modern app mascot: simple shapes, thick clean dark navy outlines, soft flat colors, no gradients, no other text. Plain solid off-white background (#F2F4FA), full body, centered, generous margins."
+  }
+]
