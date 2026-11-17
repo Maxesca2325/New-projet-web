@@ -450,3 +450,4 @@ p, li, small, .scene, .lead, .muted { text-wrap: pretty; }
 .tech { margin-top: var(--space-2); font-size: var(--font-size-xs); color: var(--color-text-secondary); }
 .tech summary { cursor: pointer; min-height: var(--touch-min); display: inline-flex; align-items: center; text-decoration: underline; }
 .tech code { display: block; padding: var(--space-2); border-radius: var(--border-radius-sm); background: var(--color-bg-tertiary); word-break: break-all; text-align: left; font-size: var(--font-size-xs); }
+.signed { display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin-bottom: var(--space-2); font-size: var(--font-size-sm); color: var(--color-status-success); word-break: break-all; }

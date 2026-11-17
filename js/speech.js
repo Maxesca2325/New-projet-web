@@ -108,10 +108,16 @@ const makeSR = () => (reuse ? (shared ??= new SR()) : new SR());
 export const micReport = () => log.map((s) => `#${s.n} ${s.ev.join(' ')}`).join(' | ');
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Safari (iPhone/iPad/Mac): abort() ka kase mikwofòn nan pou tout rès paj la. La, nou sèvi ak stop() sèlman,
+// epi nou kite Safari fèmen sesyon an poukont li.
+const SAFARI = typeof navigator !== 'undefined' && (/iP(hone|ad|od)/.test(navigator.userAgent) || (/Safari/.test(navigator.userAgent) && !/Chrom|Android|Edg/.test(navigator.userAgent)));
+const shut = (r) => { try { if (SAFARI) r.stop(); else r.abort(); } catch { /* */ } };
+
 async function closeActive() {
   const a = active;
   if (!a) return;
-  try { a.r.abort(); } catch { /* */ }
+  note(SAFARI ? 'close:stop' : 'close:abort');
+  shut(a.r);
   await Promise.race([a.ended, wait(800)]);
   if (active === a) active = null;
 }
@@ -135,7 +141,16 @@ export function listen({ onInterim, maxMs = 9000 } = {}) {
     const a = active;
     if (a) {
       await Promise.race([a.ended, wait(700)]);
-      if (active === a) { try { a.r.abort(); } catch { /* */ } active = null; } // li pa t fèmen: fòse l
+      if (active === a) {
+        // Li poko fèmen. Sou Safari nou PA fòse l: nou tann li an silans (jiska 3 s), san bloke leson an.
+        note('slow-end');
+        if (SAFARI) {
+          Promise.race([a.ended, wait(3000)]).then(() => { if (active === a) active = null; if (!active) restoreAudio(); });
+          return;
+        }
+        shut(a.r);
+        active = null;
+      }
     }
     restoreAudio();
   }
@@ -167,7 +182,7 @@ export function listen({ onInterim, maxMs = 9000 } = {}) {
         if (!started) { reuse = !reuse; shared = null; } // mikwofòn nan pa t louvri: chanje metòd pou pwochen klik la
         timers.forEach(clearTimeout);
         clearTimeout(quiet);
-        try { r.stop(); } catch { /* */ } // fèmen sesyon an touswit
+        try { r.stop(); } catch { /* */ } // fèmen sesyon an touswit (stop, pa abort)
         fn(v);
       };
       r.onstart = () => { started = true; note('start'); };
@@ -201,7 +216,11 @@ export function listen({ onInterim, maxMs = 9000 } = {}) {
 
   // Premye esè a kòmanse touswit (nan klik la). Sèlman si yon ansyen sesyon te toujou louvri, nou tann.
   if (active) log.length && note('busy');
-  const first = active ? closeActive().then(() => (stopped ? Promise.reject('aborted') : once())) : once();
+  // Sou Safari, si ansyen sesyon an poko fèmen, nou pa ka kòmanse apre yon tann (li ta deyò klik la):
+  // nou fèmen l epi nou mande moun nan peze ankò.
+  const first = !active ? once()
+    : SAFARI ? closeActive().then(() => Promise.reject('start'))
+      : closeActive().then(() => (stopped ? Promise.reject('aborted') : once()));
   const done = first
     .then(async (alts) => { await release(); return alts; })
     .catch(async (e) => { await release(); throw e; });

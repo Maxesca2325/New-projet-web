@@ -274,8 +274,10 @@ function welcome() {
       <li>${ic('wifi-off')} Mache menm san entènèt</li>
     </ul>
     <div class="grow"></div>
-    <div class="sticky-foot"><button class="btn primary big" data-go>Kòmanse, se gratis</button>
-      ${cloud.cloudReady ? '<a class="quiet-link center-link" href="#konekte">Mwen gen yon kont deja</a>' : ''}
+    <div class="sticky-foot">
+      ${cloud.currentUser() ? `<p class="signed">${ic('check')}<span>Ou konekte: <b translate="no">${esc(cloud.currentUser().email)}</b></span></p>` : ''}
+      <button class="btn primary big" data-go>${cloud.currentUser() ? 'Chwazi chemen ou' : 'Kòmanse, se gratis'}</button>
+      ${cloud.cloudReady && !cloud.currentUser() ? '<a class="quiet-link center-link" href="#konekte">Mwen gen yon kont deja</a>' : ''}
       <p class="legal-foot"><a href="#faq">Kesyon</a> · <a href="#konfidansyalite">Konfidansyalite</a> · <a href="#kondisyon">Kondisyon</a></p></div>
   </main>`);
   $('[data-say]')?.addEventListener('click', () => say('Thank you very much.'));
@@ -549,7 +551,7 @@ function profileTab() {
       </ul>
     </section>
     <button class="quiet-link" data-reset>Efase tout pwogrè mwen</button>
-    <p class="foot-note muted small">Koze v0.7 · ${cloud.currentUser() ? 'Pwogrè ou sove nan kont ou.' : 'Tout pwogrè ou rete sou telefòn ou.'}</p>`, { title: 'Pwofil' });
+    <p class="foot-note muted small">Koze v0.8 · ${cloud.currentUser() ? 'Pwogrè ou sove nan kont ou.' : 'Tout pwogrè ou rete sou telefòn ou.'}</p>`, { title: 'Pwofil' });
   $$('[data-edit]').forEach((a) => (a.onclick = () => { draft = null; }));
   $('[data-sfx]').onclick = (e) => {
     const on = !sfxOn();
@@ -580,7 +582,7 @@ async function authReturn(hash) {
   const back = await cloud.takeOAuthRedirect(hash);
   if (back === 'error') { toast('Lyen sa a ekspire oswa li deja sèvi. Mande yon nouvo lyen.'); redirect('#kont'); return true; }
   if (back === 'recovery') { recovering = true; redirect('#modpas'); return true; }
-  if (back) { await sync({ force: true }); toast(back === 'signup' ? 'Imèl ou konfime. Pwogrè ou sove.' : 'Ou konekte. Pwogrè ou sove.'); redirect(S.profile ? '#pwofil' : '#byenvini'); return true; }
+  if (back) { await sync({ force: true }); toast(back === 'signup' ? 'Imèl ou konfime. Ou konekte.' : 'Ou konekte.'); if (!S.profile) draft = null; redirect(afterLogin()); return true; }
   return false;
 }
 
@@ -600,6 +602,7 @@ function sync({ force = false } = {}) {
       await cloud.push(S);
       try { localStorage.setItem('koze.synced', String(Date.now())); } catch { /* */ }
       if (changed && !session && /^#(aprann|revize|pwofil)?$/.test(location.hash)) render();
+      else if (S.profile && !session && /^#(byenvini)?$/.test(location.hash)) redirect('#aprann'); // kont lan te gen yon pwofil deja
       return true;
     } catch { return false; } finally { syncing = null; }
   })();
@@ -641,6 +644,7 @@ function accountPanel() {
 let lastEmail = ''; // imèl moun nan te tape a, pou l pa tape l de fwa
 let recovering = false; // moun nan sot peze lyen « Reset Password » la: li pa bezwen ansyen modpas la
 const homeHash = () => (S.profile ? '#pwofil' : '#byenvini');
+const afterLogin = () => (S.profile ? '#aprann' : '#kesyon-1'); // nouvo kont: chwazi chemen an touswit, pa retounen sou akèy la
 const goBack = () => (history.length > 1 ? history.back() : redirect(homeHash()));
 
 const pwField = (id, label, auto, rules = false) => `
@@ -708,10 +712,11 @@ function wireForm(onSubmit) {
 
 async function signedIn(msg) {
   recovering = false;
-  await sync({ force: true });
+  const saved = await sync({ force: true });
   sfx('ok');
-  toast(msg);
-  redirect(homeHash());
+  toast(saved ? `${msg} Pwogrè ou sove.` : msg);
+  if (!S.profile) draft = null;
+  redirect(afterLogin());
 }
 
 function signupScreen() {
@@ -739,7 +744,7 @@ function signupScreen() {
     if (!r.ok) { err(!r.len ? `Modpas la dwe gen omwen ${cloud.PW_MIN} karaktè.` : !r.mix ? 'Mete lèt ak chif nan modpas la.' : 'Modpas sa a twò fasil pou devine. Chwazi yon lòt.'); return $('#acct-pw').focus(); }
     if (!$('#acct-agree').checked) { err('Tcheke kare a pou w dakò ak kondisyon yo.'); return $('#acct-agree').focus(); }
     const res = await cloud.signUp(email, pw);
-    if (res === 'session') return signedIn('Kont ou kreye. Pwogrè ou sove.');
+    if (res === 'session') return signedIn('Kont ou kreye.');
     checkEmailScreen('confirm', email);
   });
 }
@@ -771,7 +776,7 @@ function loginScreen(email = lastEmail) {
       $('#acct-pw').select();
       throw x;
     }
-    await signedIn('Ou konekte. Pwogrè ou sove.');
+    await signedIn('Ou konekte.');
   });
 }
 
