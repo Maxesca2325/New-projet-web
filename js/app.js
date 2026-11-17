@@ -1,7 +1,7 @@
 import { PATHS, GOALS, GOAL_TO_PATH, LEVELS, MINUTES, LESSONS } from './data.js';
 import * as store from './store.js';
 import { grade, dueIds, MASTERED_BOX } from './srs.js';
-import { say, canSpeak, canListen, listen, stopListening, setAudioIndex, preload, stopSpeaking } from './speech.js';
+import { say, canSpeak, canListen, listen, stopListening, setAudioIndex, preload, stopSpeaking, micReport } from './speech.js';
 import { buildLesson, buildReview } from './lesson.js';
 import { esc, shuffle, pick, typedMatch, spokenMatch, norm, words } from './util.js';
 import { SPRITE } from './icons.js';
@@ -549,7 +549,7 @@ function profileTab() {
       </ul>
     </section>
     <button class="quiet-link" data-reset>Efase tout pwogrè mwen</button>
-    <p class="foot-note muted small">Koze v0.6 · ${cloud.currentUser() ? 'Pwogrè ou sove nan kont ou.' : 'Tout pwogrè ou rete sou telefòn ou.'}</p>`, { title: 'Pwofil' });
+    <p class="foot-note muted small">Koze v0.7 · ${cloud.currentUser() ? 'Pwogrè ou sove nan kont ou.' : 'Tout pwogrè ou rete sou telefòn ou.'}</p>`, { title: 'Pwofil' });
   $$('[data-edit]').forEach((a) => (a.onclick = () => { draft = null; }));
   $('[data-sfx]').onclick = (e) => {
     const on = !sfxOn();
@@ -1150,6 +1150,8 @@ function run({ kind, lesson, steps, items, resume = null }) {
     'no-speech': 'Nou pa tande anyen. Pale pi fò, pi pre telefòn nan.',
     'audio-capture': 'Nou pa jwenn mikwofòn nan. Tcheke si yon lòt app ap sèvi ak li.',
   };
+  // Detay teknik pou voye bay moun k ap fè app la (fè yon kapti ekran).
+  const techNote = (e) => `<details class="tech"><summary>Detay teknik</summary><code translate="no">${esc(String(e))} · ${esc(micReport())} · ${esc(navigator.userAgent.replace(/^Mozilla\/5\.0 /, '').slice(0, 90))}</code></details>`;
   function speak(st) {
     const { item } = st;
     let tries = 0;
@@ -1177,11 +1179,11 @@ function run({ kind, lesson, steps, items, resume = null }) {
       rec = listen({ onInterim: (t) => heard(`<p class="listening">« ${esc(t)} »</p>`) });
       let alts = [];
       try { alts = await rec.done; } catch (e) {
-        heard(`<p class="mic-err">${MIC_ERR[e] || 'Mikwofòn nan pa mache kounye a. Eseye ankò, oswa kontinye san pale.'}</p>`);
+        heard(`<p class="mic-err">${MIC_ERR[e] || 'Mikwofòn nan pa mache kounye a. Eseye ankò, oswa kontinye san pale.'}</p>${techNote(e)}`);
         return reset();
       }
       reset();
-      if (!alts.length) return heard(`<p class="mic-err">${MIC_ERR['no-speech']}</p>`);
+      if (!alts.length) return heard(`<p class="mic-err">${MIC_ERR['no-speech']}</p>${techNote('vid')}`);
       tries += 1;
       const m = spokenMatch(alts, item.en);
       const colored = m.hits.length === m.words.length

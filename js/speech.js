@@ -95,6 +95,17 @@ export const canListen = !!SR;
 // iPhone (Safari): mikwofòn nan louvri SÈLMAN si nou rele start() touswit nan menm klik la (san tann).
 // Kidonk: si pa gen ansyen sesyon, nou kòmanse touswit. Si gen youn (ra), nou fèmen l anvan.
 let active = null; // { r, ended: Promise }
+
+// Ti jounal mikwofòn nan (2 dènye sesyon yo), pou n konprann sa k pase sou yon telefòn nou pa genyen.
+const log = [];
+let n = 0;
+const note = (txt) => { const s = log[log.length - 1]; if (s) s.ev.push(`${txt}@${Math.round(performance.now() - s.t0)}`); };
+// Safari iPhone: kèk vèsyon refize yon DEZYÈM objè SpeechRecognition, lòt refize reitilize menm nan.
+// Nou kòmanse ak yon nouvo objè chak fwa; si mikwofòn nan pa louvri, pwochen klik la eseye lòt metòd la.
+let reuse = false;
+let shared = null;
+const makeSR = () => (reuse ? (shared ??= new SR()) : new SR());
+export const micReport = () => log.map((s) => `#${s.n} ${s.ev.join(' ')}`).join(' | ');
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function closeActive() {
@@ -130,8 +141,13 @@ export function listen({ onInterim, maxMs = 9000 } = {}) {
   }
 
   function once() {
+    log.push({ n: ++n, t0: performance.now(), ev: [] });
+    if (log.length > 2) log.shift();
+    note(`gest=${navigator.userActivation ? +navigator.userActivation.isActive : '?'}`);
+    note(`as=${navigator.audioSession?.type || '-'}`);
+    note(reuse ? 'mode=reuse' : 'mode=new');
     audioMode('play-and-record');
-    r = new SR();
+    r = makeSR();
     r.lang = 'en-US';
     r.interimResults = true;
     r.continuous = false;
@@ -148,16 +164,19 @@ export function listen({ onInterim, maxMs = 9000 } = {}) {
       const end = (fn, v) => {
         if (finished) return;
         finished = true;
+        if (!started) { reuse = !reuse; shared = null; } // mikwofòn nan pa t louvri: chanje metòd pou pwochen klik la
         timers.forEach(clearTimeout);
         clearTimeout(quiet);
         try { r.stop(); } catch { /* */ } // fèmen sesyon an touswit
         fn(v);
       };
-      r.onstart = () => { started = true; };
-      r.onaudiostart = () => { started = true; };
+      r.onstart = () => { started = true; note('start'); };
+      r.onaudiostart = () => { started = true; note('audio'); };
+      r.onspeechstart = () => note('speech');
       r.onresult = (e) => {
         started = true;
         const res = e.results[e.results.length - 1];
+        note(res.isFinal ? 'final' : 'interim');
         if (res.isFinal) end(resolve, [...res].map((a) => a.transcript));
         else {
           interim = res[0].transcript;
@@ -167,19 +186,21 @@ export function listen({ onInterim, maxMs = 9000 } = {}) {
           quiet = setTimeout(() => end(resolve, [interim]), 1500);
         }
       };
-      r.onerror = (e) => end(reject, e.error === 'aborted' && !started ? 'start' : (e.error || 'unknown'));
+      r.onerror = (e) => (note(`err:${e.error}`), end(reject, e.error === 'aborted' && !started ? 'start' : (e.error || 'unknown')));
       r.onend = () => {
+        note('end');
         markEnded();
         if (active === me) active = null;
         end(resolve, interim ? [interim] : []); // kèk telefòn fini san rezilta final
       };
       timers.push(setTimeout(() => end(interim ? resolve : reject, interim ? [interim] : 'no-speech'), maxMs));
-      timers.push(setTimeout(() => { if (!started) end(reject, 'start'); }, 4000)); // mikwofòn nan pa janm louvri
-      try { r.start(); } catch { markEnded(); end(reject, 'start'); }
+      timers.push(setTimeout(() => { if (!started) { note('timeout'); end(reject, 'start'); } }, 4000)); // mikwofòn nan pa janm louvri
+      try { r.start(); note('start()'); } catch (x) { note(`throw:${x?.name}`); markEnded(); end(reject, 'start'); }
     });
   }
 
   // Premye esè a kòmanse touswit (nan klik la). Sèlman si yon ansyen sesyon te toujou louvri, nou tann.
+  if (active) log.length && note('busy');
   const first = active ? closeActive().then(() => (stopped ? Promise.reject('aborted') : once())) : once();
   const done = first
     .then(async (alts) => { await release(); return alts; })

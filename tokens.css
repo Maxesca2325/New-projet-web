@@ -85,21 +85,21 @@
   --font-family-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
   --font-size-xs: 0.8125rem;    /* 13px  tags (EN/KR), tab labels, option numbers only */
-  --font-size-sm: 1rem;         /* 16px  secondary text: never smaller for beginner readers */
-  --font-size-base: 1.0625rem;  /* 17px  body (never below 16px on phones) */
-  --font-size-md: 1.1875rem;    /* 19px  lead, scene */
-  --font-size-lg: 1.375rem;     /* 22px  section titles, feedback title */
-  --font-size-xl: 1.625rem;     /* 26px  prompts */
-  --font-size-2xl: 1.875rem;    /* 30px  screen titles */
-  --font-size-3xl: 2.125rem;    /* 34px  phrase to learn */
-  --font-size-4xl: clamp(2.4rem, 10vw, 3.1rem); /* welcome hero */
+  --font-size-sm: 0.9375rem;         /* 16px  secondary text: never smaller for beginner readers */
+  --font-size-base: 1rem;  /* 17px  body (never below 16px on phones) */
+  --font-size-md: 1.0625rem;    /* 19px  lead, scene */
+  --font-size-lg: 1.1875rem;     /* 22px  section titles, feedback title */
+  --font-size-xl: 1.375rem;     /* 26px  prompts */
+  --font-size-2xl: 1.5rem;    /* 30px  screen titles */
+  --font-size-3xl: 1.75rem;    /* 34px  phrase to learn */
+  --font-size-4xl: clamp(1.9rem, 8vw, 2.4rem); /* welcome hero */
 
-  --font-weight-normal: 500;
-  --font-weight-medium: 600;
-  --font-weight-semibold: 700;
-  --font-weight-bold: 800;
-  --font-weight-black: 900;     /* welcome hero only */
-  --font-weight-title: 850;     /* every screen and card title, one weight */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 800;     /* welcome hero only */
+  --font-weight-title: 750;     /* every screen and card title, one weight */
 
   --line-height-tight: 1.1;
   --line-height-normal: 1.5;
@@ -115,24 +115,24 @@
   --max-width-page: 960px;
   --measure: 34ch;              /* comfortable line for leads on phones */
 
-  --border-radius-sm: 10px;
-  --border-radius-md: 14px;
-  --border-radius-lg: 20px;
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
   --border-radius-xl: 28px;
   --border-radius-full: 999px;
-  --border-width: 2px;
+  --border-width: 1px;
 
-  /* Shadows: hard, offset "press" edges (tap-tap paint), never blurry glows */
-  --shadow-sm: 0 3px 0 var(--color-border-primary);
-  --shadow-md: 0 4px 0 var(--color-border-primary);
-  --shadow-lg: 0 5px 0 var(--color-border-strong);
-  --shadow-accent: 0 4px 0 var(--color-accent-primary-active);
+  /* Shadows: soft and light, only to lift cards a little */
+  --shadow-sm: 0 1px 2px rgba(13, 19, 51, 0.06);
+  --shadow-md: 0 2px 8px rgba(13, 19, 51, 0.07);
+  --shadow-lg: 0 6px 20px rgba(13, 19, 51, 0.08);
+  --shadow-accent: 0 2px 6px color-mix(in srgb, var(--color-accent-primary) 25%, transparent);
   --shadow-focus: 0 0 0 3px var(--color-border-focus);
 
   /* ---------- Components ---------- */
   --touch-min: 44px;
-  --button-height: 52px;
-  --button-height-lg: 56px;
+  --button-height: 48px;
+  --button-height-lg: 52px;
   --tabbar-height: 64px;
   --icon-sm: 16px;
   --icon-md: 20px;
