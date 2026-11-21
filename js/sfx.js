@@ -1,11 +1,11 @@
 // Son efè (SFX). Nou kalkile son yo an kòd (pa gen fichye pou telechaje, mache san
-// entènèt), nou fè yo tounen yon ti fichye WAV nan memwa, epi nou jwe yo ak yon
-// <audio>, menm jan ak vwa a. Konsa yo jwe sou iPhone menm lè bouton silans lan
-// aktive (Web Audio te koupe pa bouton sa a), epi sou tout navigatè.
+// entènèt), epi nou jwe yo ak Web Audio (js/audio.js), menm jan ak vwa a.
 //   sfx('ok')   bon repons: de nòt k ap monte
 //   sfx('bad')  move repons: de nòt dous k ap desann (pa agresif)
 //   sfx('tap')  ti klik lè w chwazi yon repons oswa yon mo
 //   sfx('done') fen leson: ti fanfa
+import { audioCtx, playBuffer } from './audio.js';
+
 const KEY = 'koze.sfx';
 const SR = 22050;
 
@@ -39,37 +39,24 @@ function render(notes) {
       buf[s0 + i] += w * vol * env;
     }
   }
-  // WAV 16 bit mono
-  const out = new DataView(new ArrayBuffer(44 + len * 2));
-  const str = (o, x) => [...x].forEach((c, i) => out.setUint8(o + i, c.charCodeAt(0)));
-  str(0, 'RIFF'); out.setUint32(4, 36 + len * 2, true); str(8, 'WAVEfmt ');
-  out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 1, true);
-  out.setUint32(24, SR, true); out.setUint32(28, SR * 2, true); out.setUint16(32, 2, true); out.setUint16(34, 16, true);
-  str(36, 'data'); out.setUint32(40, len * 2, true);
-  for (let i = 0; i < len; i++) out.setInt16(44 + i * 2, Math.max(-1, Math.min(1, buf[i])) * 32767, true);
-  return URL.createObjectURL(new Blob([out], { type: 'audio/wav' }));
+  return buf;
 }
 
-const urls = {};
-const pool = {};
-function player(name) {
-  urls[name] ??= render(NOTES[name]);
-  // 2 lektè pa son, pou de klik rapid pa koupe youn lòt
-  pool[name] ??= [new Audio(urls[name]), new Audio(urls[name])];
-  const [a, b] = pool[name];
-  const p = a.paused || a.ended ? a : b;
-  return p;
+// Son yo jwe ak Web Audio (gade js/audio.js: <audio> te kase mikwofòn nan sou iPhone).
+const cache = {};
+function buffer(name) {
+  const c = audioCtx();
+  if (!c) return null;
+  if (!cache[name]) {
+    const data = render(NOTES[name]);
+    const b = c.createBuffer(1, data.length, SR);
+    b.getChannelData(0).set(data);
+    cache[name] = b;
+  }
+  return cache[name];
 }
-
-// iPhone (Safari 16.4+): mete son app la an mòd "playback" pou bouton silans lan pa koupe l.
-try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch { /* */ }
 
 export function sfx(name) {
-  if (!sfxOn() || !NOTES[name] || typeof Audio === 'undefined') return;
-  try {
-    const a = player(name);
-    a.currentTime = 0;
-    a.volume = name === 'tap' ? 0.6 : 1;
-    a.play().catch(() => {});
-  } catch { /* son pa disponib: pa grav */ }
+  if (!sfxOn() || !NOTES[name]) return;
+  try { playBuffer(buffer(name), name === 'tap' ? 0.6 : 1); } catch { /* son pa disponib: pa grav */ }
 }

@@ -3,13 +3,13 @@
 // 2. Sinon vwa telefòn nan (speechSynthesis).
 
 const hasTTS = typeof window !== 'undefined' && 'speechSynthesis' in window;
-const hasAudio = typeof Audio !== 'undefined';
+import { hasWebAudio, loadBuffer, playBuffer } from './audio.js';
 let audioIndex = new Map(); // tèks anglè -> url mp3
 export let canSpeak = hasTTS;
 
 export function setAudioIndex(map) {
   audioIndex = map;
-  if (hasAudio && map.size) canSpeak = true;
+  if (hasWebAudio && map.size) canSpeak = true;
 }
 
 let voice = null;
@@ -38,55 +38,44 @@ function ttsSay(text, slow) {
   } catch { /* */ }
 }
 
-// Nou chaje mp3 a an "blob": sa evite pwoblèm Safari ak fichye ki nan cache san entènèt.
-const blobs = new Map();
-async function blobUrl(url) {
-  if (!blobs.has(url)) {
-    blobs.set(url, fetch(url).then((r) => {
-      if (!r.ok) throw new Error(r.status);
-      return r.blob();
-    }).then((b) => URL.createObjectURL(b)).catch((e) => { blobs.delete(url); throw e; }));
-  }
-  return blobs.get(url);
-}
-
-let current = null;
+// Vwa a jwe ak Web Audio (js/audio.js), pa ak <audio>: sou iPhone, yon <audio> ki fin jwe
+// te touye pwochen mikwofòn nan. Vèsyon dousman an se yon fichye apa (audio/slow/), ki pa chanje ton vwa a.
+const slowUrl = (url) => url.replace('audio/', 'audio/slow/');
+let stopCurrent = () => {};
+let ticket = 0;
 export async function say(text, slow = false) {
-  const url = hasAudio && audioIndex.get(text);
-  if (!url) return ttsSay(text, slow);
+  const url = audioIndex.get(text);
+  if (!url || !hasWebAudio) return ttsSay(text, slow);
+  const me = ++ticket;
+  stopSpeaking();
   try {
-    current?.pause();
-    if (hasTTS) speechSynthesis.cancel();
-    const a = new Audio(await blobUrl(url));
-    a.playbackRate = slow ? 0.7 : 1;
-    a.preservesPitch = true;
-    current = a;
-    await a.play();
+    const buf = await loadBuffer(slow ? slowUrl(url) : url);
+    if (me !== ticket) return; // yon lòt fraz te mande pandan n t ap chaje
+    stopCurrent = playBuffer(buf);
   } catch {
-    ttsSay(text, slow); // fichye a pa la oswa navigatè a refize jwe l
+    if (me === ticket) ttsSay(text, slow); // fichye a pa la
   }
 }
 
 export function stopSpeaking() {
-  current?.pause();
+  stopCurrent();
+  stopCurrent = () => {};
   if (hasTTS) speechSynthesis.cancel();
 }
 
 // Chaje odyo yon leson davans (pou l mache san entènèt epi san tann).
 export function preload(texts) {
+  if (!hasWebAudio) return;
   for (const t of texts) {
     const url = audioIndex.get(t);
-    if (url) blobUrl(url).catch(() => {});
+    if (url) { loadBuffer(url).catch(() => {}); loadBuffer(slowUrl(url)).catch(() => {}); }
   }
 }
 
-// Mòd son iPhone (Safari 16.4+): « playback » pou vwa a ak son efè yo (bouton silans pa koupe yo),
-// « play-and-record » pandan mikwofòn nan louvri. Nou pa janm kite « playback » pandan n ap koute:
-// iPhone refize louvri mikwofòn nan nan mòd sa a.
-function audioMode(type) {
-  try { if (navigator.audioSession && navigator.audioSession.type !== type) navigator.audioSession.type = type; } catch { /* */ }
-}
-export const restoreAudio = () => audioMode('playback');
+// Mòd son iPhone: nou mete « playback » yon sèl fwa (js/audio.js) epi nou PA chanje l pandan mikwofòn nan
+// louvri: chanje mòd la ka dezaktive sesyon son an pandan rekonesans lan (bug WebKit 317741).
+function audioMode() { /* pa chanje anyen */ }
+export const restoreAudio = () => {};
 
 const SR = typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
 export const canListen = !!SR;
