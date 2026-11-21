@@ -1,7 +1,7 @@
 /* Koze — design tokens
-   Philosophy: "Tap-tap" = Scandinavian base (warm, legible, rounded, accessible)
-   with Neo-Memphis accents only on the tap-tap stripe, the mascot and victory moments.
-   See .design/koze/DESIGN_BRIEF.md and .design/koze/DESIGN_TOKENS.md.
+   Direction (choisie par l'utilisateur): app d'apprentissage classique, au niveau de Busuu / Babbel.
+   Fond neutre, surfaces blanches, un seul bleu pour les actions, couleurs d'état seulement quand elles
+   portent un sens (bonne / mauvaise réponse, série). Élévation légère, jamais de bords « pressés ».
    Every component uses these tokens; no raw values in styles.css. */
 
 /* Nunito: rounded sans without serifs, chosen by the user. One variable file (200–1000). */
@@ -12,57 +12,57 @@
    Koze is one column, mobile first: --max-width-content keeps it phone-shaped on big screens. */
 
 :root {
-  /* ---------- Brand (the Haitian flag + tap-tap paint) ---------- */
-  --color-brand-blue: #0b2bb8;
-  --color-brand-red: #d21034;
-  --color-brand-sun: #f2a900;
-  --color-brand-leaf: #0b8a4c;
-  --color-brand-blue-soft: #e5eaff;
-  --color-brand-red-soft: #fde6ea;
-  --color-brand-sun-soft: #fff3cf;
-  --color-brand-leaf-soft: #e1f5ea;
-  --color-brand-sun-ink: #6b4b00;       /* text/icon on sun-soft */
-  --color-brand-sun-icon: #a87400;      /* sun as an icon on white (3:1); plain --color-brand-sun is for fills only */
-  --color-on-sun: #2a1d00;              /* text on a solid sun fill, same in both themes */
+  /* ---------- Brand (logo, path icons, streak) ---------- */
+  --color-brand-blue: #2357d9;
+  --color-brand-red: #d0193f;
+  --color-brand-sun: #f5b40a;
+  --color-brand-leaf: #13865a;
+  --color-brand-blue-soft: #edf2fd;
+  --color-brand-red-soft: #fdeef1;
+  --color-brand-sun-soft: #fff6dc;
+  --color-brand-leaf-soft: #e8f6ef;
+  --color-brand-sun-ink: #7a5200;       /* text/icon on sun-soft */
+  --color-brand-sun-icon: #a46c00;      /* sun as an icon on white (3:1) */
+  --color-on-sun: #2a1d00;
 
   /* ---------- Backgrounds ---------- */
-  --color-bg-primary: #f2f4fa;          /* page: cool off-white, biased to the blue */
+  --color-bg-primary: #f6f7f9;          /* page: neutral off-white */
   --color-bg-secondary: #ffffff;        /* cards, sheets, options */
-  --color-bg-tertiary: #e8ecf6;         /* wells, empty tiles, track */
-  --color-bg-inverse: #0d1333;
+  --color-bg-tertiary: #eef0f3;         /* wells, tracks, empty tiles */
+  --color-bg-inverse: #1b2230;
 
   /* ---------- Text ---------- */
-  --color-text-primary: #0d1333;
-  --color-text-secondary: #4f5780;
-  --color-text-tertiary: #7d84a6;       /* placeholders, disabled */
-  --color-text-inverse: #f2f4fa;
-  --color-text-link: #0b2bb8;
+  --color-text-primary: #1b2230;
+  --color-text-secondary: #5c6577;
+  --color-text-tertiary: #8a92a3;       /* placeholders, disabled */
+  --color-text-inverse: #f6f7f9;
+  --color-text-link: #1f4fc9;
   --color-text-on-accent: #ffffff;
 
   /* ---------- Borders ---------- */
-  --color-border-primary: #dce1ef;
-  --color-border-secondary: #e8ecf6;
-  --color-border-strong: #0d1333;       /* the one framed card (next lesson) */
-  --color-border-focus: #0b2bb8;
+  --color-border-primary: #e3e6eb;
+  --color-border-secondary: #eef0f3;
+  --color-border-strong: #c9ced8;
+  --color-border-focus: #2357d9;
 
   /* ---------- Accent (actions) ---------- */
-  --color-accent-primary: #0b2bb8;
-  --color-accent-primary-hover: #0a26a3;
-  --color-accent-primary-active: #061a7a;   /* also the "pressed" edge of 3D buttons */
-  --color-accent-secondary: #e5eaff;
-  --color-accent-secondary-text: #0b2bb8;
+  --color-accent-primary: #2357d9;
+  --color-accent-primary-hover: #1d4bbf;
+  --color-accent-primary-active: #183f9f;
+  --color-accent-secondary: #edf2fd;
+  --color-accent-secondary-text: #1f4fc9;
 
   /* ---------- Status ---------- */
-  --color-status-success: #0b7a43;
-  --color-status-success-bg: #dff4e8;
-  --color-status-warning: #8a5d00;
-  --color-status-warning-bg: #fff3cf;
-  --color-status-error: #b8173a;
-  --color-status-error-bg: #fde7ec;
-  --color-status-info: #0b2bb8;
-  --color-status-info-bg: #e5eaff;
+  --color-status-success: #11774f;
+  --color-status-success-bg: #e8f6ef;
+  --color-status-warning: #8a5a00;
+  --color-status-warning-bg: #fff6dc;
+  --color-status-error: #c0173a;
+  --color-status-error-bg: #fdeef1;
+  --color-status-info: #1f4fc9;
+  --color-status-info-bg: #edf2fd;
 
-  --color-surface-overlay: rgba(13, 19, 51, 0.45);
+  --color-surface-overlay: rgba(17, 22, 32, 0.45);
 
   /* ---------- Spacing (4px base, 16px = --space-4) ---------- */
   --space-0: 0;
@@ -105,7 +105,7 @@
   --line-height-normal: 1.5;
   --line-height-relaxed: 1.7;
 
-  --letter-spacing-tight: -0.015em;
+  --letter-spacing-tight: -0.02em;
   --letter-spacing-normal: 0;
   --letter-spacing-wide: 0.08em;
 
@@ -118,16 +118,16 @@
   --border-radius-sm: 8px;
   --border-radius-md: 12px;
   --border-radius-lg: 16px;
-  --border-radius-xl: 28px;
+  --border-radius-xl: 24px;
   --border-radius-full: 999px;
   --border-width: 1px;
 
-  /* Shadows: soft and light, only to lift cards a little */
-  --shadow-sm: 0 1px 2px rgba(13, 19, 51, 0.06);
-  --shadow-md: 0 2px 8px rgba(13, 19, 51, 0.07);
-  --shadow-lg: 0 6px 20px rgba(13, 19, 51, 0.08);
-  --shadow-accent: 0 2px 6px color-mix(in srgb, var(--color-accent-primary) 25%, transparent);
-  --shadow-focus: 0 0 0 3px var(--color-border-focus);
+  /* Shadows: offset + soft blur, low opacity. Cards use either a border or a shadow, never both. */
+  --shadow-sm: 0 1px 2px rgba(17, 22, 32, 0.06);
+  --shadow-md: 0 2px 8px rgba(17, 22, 32, 0.06), 0 1px 2px rgba(17, 22, 32, 0.04);
+  --shadow-lg: 0 8px 24px rgba(17, 22, 32, 0.08), 0 2px 4px rgba(17, 22, 32, 0.04);
+  --shadow-accent: 0 2px 8px rgba(35, 87, 217, 0.24);
+  --shadow-focus: 0 0 0 3px rgba(35, 87, 217, 0.28);
 
   /* ---------- Components ---------- */
   --touch-min: 44px;
@@ -148,46 +148,46 @@
   --easing-default: cubic-bezier(0.4, 0, 0.2, 1);
   --easing-in: cubic-bezier(0.4, 0, 1, 1);
   --easing-out: cubic-bezier(0, 0, 0.2, 1);
-  --easing-bounce: cubic-bezier(0.34, 1.56, 0.64, 1); /* the end-of-lesson jump only */
   --easing-out-expo: cubic-bezier(0.16, 1, 0.3, 1);   /* everything else that enters */
 
   color-scheme: light;
 }
 
-/* Dark: cool night navy (not inverted), off-white text, lighter accents for contrast,
-   no press shadows on dark surfaces (they read as dirt). */
+/* Dark: neutral graphite (not inverted), off-white text, lighter blue for contrast. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-brand-blue: #7c92ff; --color-brand-red: #ff5a76; --color-brand-sun: #ffc83d; --color-brand-leaf: #3fd38a;
-    --color-brand-blue-soft: #1b2457; --color-brand-red-soft: #3a1424; --color-brand-sun-soft: #352a0b; --color-brand-leaf-soft: #0d2c1e;
-    --color-brand-sun-ink: #ffd76a; --color-brand-sun-icon: #ffc83d;
-    --color-bg-primary: #090d22; --color-bg-secondary: #121839; --color-bg-tertiary: #1a2148; --color-bg-inverse: #e8ebfa;
-    --color-text-primary: #e8ebfa; --color-text-secondary: #a6acd2; --color-text-tertiary: #737aa3; --color-text-inverse: #090d22;
-    --color-text-link: #8fa2ff; --color-text-on-accent: #070b20;
-    --color-border-primary: #252d5c; --color-border-secondary: #1a2148; --color-border-strong: #a6acd2; --color-border-focus: #8fa2ff;
-    --color-accent-primary: #7c92ff; --color-accent-primary-hover: #8fa2ff; --color-accent-primary-active: #4f66e6;
-    --color-accent-secondary: #1b2457; --color-accent-secondary-text: #a9b7ff;
-    --color-status-success: #4fdc93; --color-status-success-bg: #0e2c1d; --color-status-warning: #ffc83d; --color-status-warning-bg: #352a0b;
-    --color-status-error: #ff7a90; --color-status-error-bg: #3a1422; --color-status-info: #8fa2ff; --color-status-info-bg: #1b2457;
+    --color-brand-blue: #7ea2ff; --color-brand-red: #ff6b85; --color-brand-sun: #ffc94a; --color-brand-leaf: #4fd197;
+    --color-brand-blue-soft: #1c2742; --color-brand-red-soft: #3a1a24; --color-brand-sun-soft: #33280e; --color-brand-leaf-soft: #12301f;
+    --color-brand-sun-ink: #ffd772; --color-brand-sun-icon: #ffc94a;
+    --color-bg-primary: #0f1217; --color-bg-secondary: #181c24; --color-bg-tertiary: #222833; --color-bg-inverse: #eceef2;
+    --color-text-primary: #eceef2; --color-text-secondary: #a3abba; --color-text-tertiary: #7a8394; --color-text-inverse: #0f1217;
+    --color-text-link: #8fb0ff; --color-text-on-accent: #0b1020;
+    --color-border-primary: #2a303c; --color-border-secondary: #222833; --color-border-strong: #3a4250; --color-border-focus: #8fb0ff;
+    --color-accent-primary: #7ea2ff; --color-accent-primary-hover: #93b2ff; --color-accent-primary-active: #6189f0;
+    --color-accent-secondary: #1c2742; --color-accent-secondary-text: #a9c0ff;
+    --color-status-success: #4fd197; --color-status-success-bg: #12301f; --color-status-warning: #ffc94a; --color-status-warning-bg: #33280e;
+    --color-status-error: #ff7f95; --color-status-error-bg: #3a1a24; --color-status-info: #8fb0ff; --color-status-info-bg: #1c2742;
     --color-surface-overlay: rgba(0, 0, 0, 0.6);
-    --shadow-sm: 0 2px 0 rgba(0, 0, 0, 0.35); --shadow-md: 0 3px 0 rgba(0, 0, 0, 0.4); --shadow-lg: 0 4px 0 rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3); --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.35); --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-accent: none; --shadow-focus: 0 0 0 3px rgba(126, 162, 255, 0.35);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --color-brand-blue: #7c92ff; --color-brand-red: #ff5a76; --color-brand-sun: #ffc83d; --color-brand-leaf: #3fd38a;
-  --color-brand-blue-soft: #1b2457; --color-brand-red-soft: #3a1424; --color-brand-sun-soft: #352a0b; --color-brand-leaf-soft: #0d2c1e;
-  --color-brand-sun-ink: #ffd76a; --color-brand-sun-icon: #ffc83d;
-  --color-bg-primary: #090d22; --color-bg-secondary: #121839; --color-bg-tertiary: #1a2148; --color-bg-inverse: #e8ebfa;
-  --color-text-primary: #e8ebfa; --color-text-secondary: #a6acd2; --color-text-tertiary: #737aa3; --color-text-inverse: #090d22;
-  --color-text-link: #8fa2ff; --color-text-on-accent: #070b20;
-  --color-border-primary: #252d5c; --color-border-secondary: #1a2148; --color-border-strong: #a6acd2; --color-border-focus: #8fa2ff;
-  --color-accent-primary: #7c92ff; --color-accent-primary-hover: #8fa2ff; --color-accent-primary-active: #4f66e6;
-  --color-accent-secondary: #1b2457; --color-accent-secondary-text: #a9b7ff;
-  --color-status-success: #4fdc93; --color-status-success-bg: #0e2c1d; --color-status-warning: #ffc83d; --color-status-warning-bg: #352a0b;
-  --color-status-error: #ff7a90; --color-status-error-bg: #3a1422; --color-status-info: #8fa2ff; --color-status-info-bg: #1b2457;
+  --color-brand-blue: #7ea2ff; --color-brand-red: #ff6b85; --color-brand-sun: #ffc94a; --color-brand-leaf: #4fd197;
+  --color-brand-blue-soft: #1c2742; --color-brand-red-soft: #3a1a24; --color-brand-sun-soft: #33280e; --color-brand-leaf-soft: #12301f;
+  --color-brand-sun-ink: #ffd772; --color-brand-sun-icon: #ffc94a;
+  --color-bg-primary: #0f1217; --color-bg-secondary: #181c24; --color-bg-tertiary: #222833; --color-bg-inverse: #eceef2;
+  --color-text-primary: #eceef2; --color-text-secondary: #a3abba; --color-text-tertiary: #7a8394; --color-text-inverse: #0f1217;
+  --color-text-link: #8fb0ff; --color-text-on-accent: #0b1020;
+  --color-border-primary: #2a303c; --color-border-secondary: #222833; --color-border-strong: #3a4250; --color-border-focus: #8fb0ff;
+  --color-accent-primary: #7ea2ff; --color-accent-primary-hover: #93b2ff; --color-accent-primary-active: #6189f0;
+  --color-accent-secondary: #1c2742; --color-accent-secondary-text: #a9c0ff;
+  --color-status-success: #4fd197; --color-status-success-bg: #12301f; --color-status-warning: #ffc94a; --color-status-warning-bg: #33280e;
+  --color-status-error: #ff7f95; --color-status-error-bg: #3a1a24; --color-status-info: #8fb0ff; --color-status-info-bg: #1c2742;
   --color-surface-overlay: rgba(0, 0, 0, 0.6);
-  --shadow-sm: 0 2px 0 rgba(0, 0, 0, 0.35); --shadow-md: 0 3px 0 rgba(0, 0, 0, 0.4); --shadow-lg: 0 4px 0 rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3); --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.35); --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-accent: none; --shadow-focus: 0 0 0 3px rgba(126, 162, 255, 0.35);
   color-scheme: dark;
 }
 

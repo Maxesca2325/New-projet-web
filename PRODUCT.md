@@ -27,12 +27,12 @@ Utilisée seule, sur téléphone, souvent dehors ou dans les transports, parfois
 
 ## Capabilities and Constraints
 
-- App web statique (HTML, CSS, modules JS, sans build), service worker hors ligne, progrès stocké sur l'appareil (pas de compte pour l'instant).
+- App web statique (HTML, CSS, modules JS, sans build), service worker hors ligne, progrès stocké sur l'appareil, comptes optionnels (Supabase : e-mail + mot de passe) pour sauvegarder les progrès.
 - Chemins : Baz + Biznis online, Etid, Vwayaj, Lavi chak jou, Konstriksyon, Swen sante ; 15 leçons, 90 phrases (anglais, créole, prononciation créole), audio ElevenLabs « Sarah ».
 - Exercices : nouvelle phrase, choix, écoute, remettre les mots en ordre, écrire, parler (micro tolérant à l'accent).
 - Révision espacée (Leitner), XP, objectif du jour, série, sons d'effet, vibration.
 - Navigation : onglets Aprann / Revize / Pwofil, retour Android, reprise après actualisation.
-- Undecided : comptes (Supabase), Premium et paiement (carte + MonCash), autres langues, voix définitive.
+- Undecided : Premium et paiement (carte + MonCash), autres langues, voix définitive.
 
 ## Brand Commitments
 
@@ -40,6 +40,7 @@ Utilisée seule, sur téléphone, souvent dehors ou dans les transports, parfois
 - **Police : Nunito** (sans sérif arrondie), choisie par l'utilisateur pour remplacer Bricolage + Atkinson : pas d'empattements. L'étiquette « Di l konsa » reste.
 - **Aucun style « fait par une IA »** : pas de dégradés décoratifs, d'émojis en guise d'icônes, de petits titres en capitales au-dessus des titres, de grilles de chiffres décoratives.
 - Logo, mascotte (trogon) et couleurs du drapeau existent mais ne sont pas obligatoires dans une refonte.
+- **Look (choisi par l'utilisateur, 2026-11-21) : l'app d'apprentissage classique, au niveau de finition de Busuu / Babbel** — fond neutre, surfaces blanches, un seul bleu d'action, vert/rouge seulement pour les réponses, élévation légère. Pas de style « brutal » (bords épais, ombres dures, texte trop gros).
 
 ## Evidence on Hand
 

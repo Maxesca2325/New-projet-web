@@ -17,7 +17,6 @@ document.body.insertAdjacentHTML('afterbegin', SPRITE);
 const ic = (name, cls = '') => `<svg class="ic ${cls}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 const LOGO = `<svg viewBox="0 0 64 64" aria-hidden="true"><defs><clipPath id="kz-b"><path d="M14 8h36a10 10 0 0 1 10 10v22a10 10 0 0 1-10 10H30l-12 10v-10h-4A10 10 0 0 1 4 40V18A10 10 0 0 1 14 8z"/></clipPath></defs><g clip-path="url(#kz-b)"><rect width="64" height="29" fill="#0b2bb8"/><rect y="29" width="64" height="35" fill="#d21034"/></g><path d="M25 18v22M25 31l11-11M28.5 28l8.5 12" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
 const wordmark = (big = false) => `<span class="wordmark ${big ? 'big' : ''}" translate="no">${LOGO}<span>koze</span></span>`;
-const STRIPES = '<div class="stripes" aria-hidden="true"><i></i><i></i><i></i><i></i></div>';
 const ptile = (p, cls = '') => `<span class="ptile t-${p.ton} ${cls}">${ic(p.ikon, 'lg')}</span>`;
 const MASKOT = {
   bonjou: 'img/maskot.webp',
@@ -256,7 +255,6 @@ function welcome() {
   view(`
   <main class="welcome">
     ${wordmark(true)}
-    ${STRIPES}
     <div class="hero-row">
       <h1 class="hero">Pale anglè.<br>Aprann li <em>an kreyòl.</em></h1>
       ${maskot('bonjou', 'hero-maskot', 'Ti zwazo Koze a, yon trogon, zwazo nasyonal Ayiti')}
@@ -381,8 +379,7 @@ function learnTab() {
   shell('aprann', `
     ${next ? `
     <section class="next-card">
-      ${STRIPES}
-      <div class="next-body">
+        <div class="next-body">
         <h2>${esc(next.tit)}</h2>
         <p class="meta">Pwochen leson · ${esc(PATH.get(next.path).non)} · ${next.items.length} fraz</p>
         <p class="muted">${esc(next.sitiyasyon)}</p>
@@ -396,8 +393,7 @@ function learnTab() {
       </div>
     </section>` : `
     <section class="next-card">
-      ${STRIPES}
-      <div class="next-body empty-next">
+        <div class="next-body empty-next">
         ${maskot('kontan', 'empty-maskot')}
         <h2>Ou fini tout leson ki disponib yo!</h2>
         <p class="muted">Nouvo leson ap vini byento. Pandan tan sa a, revize chak jou pou w kenbe sa w aprann.</p>
@@ -551,7 +547,7 @@ function profileTab() {
       </ul>
     </section>
     <button class="quiet-link" data-reset>Efase tout pwogrè mwen</button>
-    <p class="foot-note muted small">Koze v0.9 · ${cloud.currentUser() ? 'Pwogrè ou sove nan kont ou.' : 'Tout pwogrè ou rete sou telefòn ou.'}</p>`, { title: 'Pwofil' });
+    <p class="foot-note muted small">Koze v1.0 · ${cloud.currentUser() ? 'Pwogrè ou sove nan kont ou.' : 'Tout pwogrè ou rete sou telefòn ou.'}</p>`, { title: 'Pwofil' });
   $$('[data-edit]').forEach((a) => (a.onclick = () => { draft = null; }));
   $('[data-sfx]').onclick = (e) => {
     const on = !sfxOn();
@@ -1241,7 +1237,7 @@ function run({ kind, lesson, steps, items, resume = null }) {
     ].join('');
     view(`
     <main class="screen done">
-      <div class="celebrate">${STRIPES}${maskot('kontan', 'done-maskot')}</div>
+      <div class="celebrate">${maskot('kontan', 'done-maskot')}</div>
       <h1>${kind === 'lesson' ? 'Leson fini!' : 'Revizyon fini!'}</h1>
       <p class="scene">${kind === 'lesson' ? `Kounye a ou ka ${esc(lesson.objektif)}` : 'Memwa w ap vin pi fò chak jou.'}</p>
       <div class="stat-row">
