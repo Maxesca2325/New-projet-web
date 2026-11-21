@@ -85,14 +85,14 @@
   --font-family-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
   --font-size-xs: 0.8125rem;    /* 13px  tags (EN/KR), tab labels, option numbers only */
-  --font-size-sm: 0.9375rem;         /* 16px  secondary text: never smaller for beginner readers */
-  --font-size-base: 1rem;  /* 17px  body (never below 16px on phones) */
-  --font-size-md: 1.0625rem;    /* 19px  lead, scene */
-  --font-size-lg: 1.1875rem;     /* 22px  section titles, feedback title */
-  --font-size-xl: 1.375rem;     /* 26px  prompts */
-  --font-size-2xl: 1.5rem;    /* 30px  screen titles */
-  --font-size-3xl: 1.75rem;    /* 34px  phrase to learn */
-  --font-size-4xl: clamp(1.9rem, 8vw, 2.4rem); /* welcome hero */
+  --font-size-sm: 0.9375rem;         /* 15px  secondary text */
+  --font-size-base: 1rem;  /* 16px  body */
+  --font-size-md: 1.0625rem;    /* 17px  lead, instructions */
+  --font-size-lg: 1.125rem;     /* 18px  section titles, feedback title */
+  --font-size-xl: 1.25rem;     /* 20px  prompts, card titles */
+  --font-size-2xl: 1.375rem;    /* 22px  screen titles */
+  --font-size-3xl: 1.625rem;    /* 26px  phrase to learn */
+  --font-size-4xl: clamp(1.75rem, 7vw, 2.125rem); /* welcome hero 28-34px */
 
   --font-weight-normal: 400;
   --font-weight-medium: 500;

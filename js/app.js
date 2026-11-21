@@ -650,7 +650,7 @@ const pwField = (id, label, auto, rules = false) => `
       minlength="${cloud.PW_MIN}" maxlength="${cloud.PW_MAX}" ${rules ? `aria-describedby="${id}-rules"` : ''}>
     <button type="button" class="pw-eye" data-eye="${id}" aria-label="Montre modpas la" aria-pressed="false">${ic('eye')}</button>
   </div>
-  ${rules ? `<ul class="pw-rules" id="${id}-rules">
+  ${rules ? `<ul class="pw-rules" id="${id}-rules" hidden>
     <li data-r="len">${ic('check')}<span>Omwen ${cloud.PW_MIN} karaktè</span></li>
     <li data-r="mix">${ic('check')}<span>Lèt ak chif</span></li>
     <li data-r="safe">${ic('check')}<span>Pa fasil pou devine (pa « 12345678 », pa non imèl ou)</span></li>
@@ -659,11 +659,19 @@ const emailField = (email = '') => `
   <label for="acct-email">Imèl ou</label>
   <input id="acct-email" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" required placeholder="egzanp@gmail.com" value="${esc(email)}">`;
 const legalLine = (what) => `<p class="muted small legal">${what} <a href="#kondisyon">Kondisyon yo</a> ak <a href="#konfidansyalite">Règ konfidansyalite a</a>.</p>`;
-const authTabs = (on) => `
-  <nav class="seg" aria-label="Kont">
-    <a href="#kont" ${on === 'kont' ? 'aria-current="page"' : ''}>Kreye kont</a>
-    <a href="#konekte" ${on === 'konekte' ? 'aria-current="page"' : ''}>Konekte</a>
-  </nav>`;
+// Paj konekte / kreye kont: ti logo, tit, fòm nan yon kat, lyen pou chanje paj anba, lyen legal yo.
+const authShell = ({ title, sub = '', form, below = '' }) => view(`
+  <main class="screen auth">
+    <div class="run-top"><button class="icon-btn" data-back aria-label="Retounen">${ic('arrow-left', 'lg')}</button></div>
+    <header class="auth-head">
+      <span class="auth-logo" aria-hidden="true">${LOGO}</span>
+      <h1>${title}</h1>
+      ${sub ? `<p>${sub}</p>` : ''}
+    </header>
+    <section class="auth-card">${form}</section>
+    ${below}
+    <p class="auth-legal"><a href="#faq">Èd</a> · <a href="#konfidansyalite">Konfidansyalite</a> · <a href="#kondisyon">Kondisyon</a></p>
+  </main>`);
 const authPage = (body) => view(`
   <main class="screen setup account">
     <div class="run-top"><button class="icon-btn" data-back aria-label="Retounen">${ic('arrow-left', 'lg')}</button></div>
@@ -691,6 +699,7 @@ function wireForm(onSubmit) {
   const live = () => {
     err('');
     if (!rules) return;
+    rules.hidden = false;
     const r = cloud.passwordRules($('#' + rules.id.replace('-rules', '')).value, $('#acct-email')?.value || cloud.currentUser()?.email || '');
     for (const li of rules.children) li.classList.toggle('ok', r[li.dataset.r]);
   };
@@ -717,20 +726,20 @@ async function signedIn(msg) {
 
 function signupScreen() {
   if (cloud.currentUser()) return redirect(homeHash());
-  authPage(`
-    ${authTabs('kont')}
-    <h1>Kreye kont Koze ou</h1>
-    <p class="muted">Gratis. Pwogrè ou ap sove: ou p ap pèdi l si w chanje telefòn.</p>
-    <form class="acct-form" data-form novalidate>
+  authShell({
+    title: 'Kreye yon kont',
+    sub: 'Gratis. Pwogrè ou ap sove menm si w chanje telefòn.',
+    form: `<form class="acct-form" data-form novalidate>
       ${emailField()}
-      ${pwField('acct-pw', 'Chwazi yon modpas', 'new-password', true)}
+      ${pwField('acct-pw', 'Modpas', 'new-password', true)}
       <label class="agree"><input type="checkbox" id="acct-agree" required>
-        <span>Mwen gen omwen 13 an, epi mwen dakò ak <a href="#kondisyon">Kondisyon yo</a> ak <a href="#konfidansyalite">Règ konfidansyalite a</a>.</span></label>
+        <span>Mwen gen 13 an oswa plis, epi m dakò ak <a href="#kondisyon">Kondisyon yo</a> ak <a href="#konfidansyalite">Konfidansyalite a</a>.</span></label>
       <p class="form-err" role="alert" aria-live="polite"></p>
       <button class="btn primary big" type="submit">Kreye kont mwen</button>
     </form>
-    ${cloud.googleReady ? `<p class="or">oswa</p><a class="btn ghost big" href="${esc(cloud.googleUrl())}">Kontinye ak Google</a>` : ''}
-    <a class="quiet-link center-link" href="#konekte">Mwen gen yon kont deja</a>`);
+    ${cloud.googleReady ? `<p class="or">oswa</p><a class="btn ghost big" href="${esc(cloud.googleUrl())}">Kontinye ak Google</a>` : ''}`,
+    below: '<p class="auth-switch">Ou gen yon kont deja? <a href="#konekte">Konekte</a></p>',
+  });
   $('#acct-email').focus();
   wireForm(async ({ err }) => {
     const email = $('#acct-email').value.trim().toLowerCase();
@@ -747,18 +756,18 @@ function signupScreen() {
 
 function loginScreen(email = lastEmail) {
   if (cloud.currentUser()) return redirect(homeHash());
-  authPage(`
-    ${authTabs('konekte')}
-    <h1>Konekte</h1>
-    <form class="acct-form" data-form novalidate>
+  authShell({
+    title: 'Konekte',
+    sub: 'Kontinye kote w te kite a.',
+    form: `<form class="acct-form" data-form novalidate>
       ${emailField(email)}
-      ${pwField('acct-pw', 'Modpas', 'current-password')}
-      <a class="quiet-link forgot" href="#bliye-modpas">Ou bliye modpas ou?</a>
+      ${pwField('acct-pw', 'Modpas', 'current-password').replace('<label for="acct-pw">Modpas</label>', '<div class="label-row"><label for="acct-pw">Modpas</label><a class="forgot" href="#bliye-modpas">Ou bliye l?</a></div>')}
       <p class="form-err" role="alert" aria-live="polite"></p>
       <button class="btn primary big" type="submit">Konekte</button>
     </form>
-    ${cloud.googleReady ? `<p class="or">oswa</p><a class="btn ghost big" href="${esc(cloud.googleUrl())}">Kontinye ak Google</a>` : ''}
-    <a class="quiet-link center-link" href="#kont">Mwen poko gen kont</a>`);
+    ${cloud.googleReady ? `<p class="or">oswa</p><a class="btn ghost big" href="${esc(cloud.googleUrl())}">Kontinye ak Google</a>` : ''}`,
+    below: '<p class="auth-switch">Ou poko gen kont? <a href="#kont">Kreye youn</a></p>',
+  });
   (email ? $('#acct-pw') : $('#acct-email')).focus();
   $('.forgot').onclick = () => { lastEmail = $('#acct-email').value.trim(); };
   wireForm(async ({ err }) => {
@@ -777,14 +786,16 @@ function loginScreen(email = lastEmail) {
 }
 
 function forgotScreen() {
-  authPage(`
-    <h1>Ou bliye modpas ou?</h1>
-    <p class="muted">Ekri imèl kont ou. N ap voye yon lyen pou w chwazi yon nouvo modpas.</p>
-    <form class="acct-form" data-form novalidate>
+  authShell({
+    title: 'Ou bliye modpas ou?',
+    sub: 'Ekri imèl kont ou. N ap voye yon lyen pou w chwazi yon nouvo modpas.',
+    form: `<form class="acct-form" data-form novalidate>
       ${emailField(lastEmail)}
       <p class="form-err" role="alert" aria-live="polite"></p>
       <button class="btn primary big" type="submit">Voye lyen an</button>
-    </form>`);
+    </form>`,
+    below: '<p class="auth-switch">Ou sonje l? <a href="#konekte">Konekte</a></p>',
+  });
   $('#acct-email').focus();
   wireForm(async ({ err }) => {
     const email = $('#acct-email').value.trim().toLowerCase();
