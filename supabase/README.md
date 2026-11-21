@@ -8,10 +8,26 @@ Koze mache san kont. Avèk yon kont, moun nan konekte ak **imèl + modpas**, epi
 1. Ale sou **supabase.com** → *Start your project* → konekte (GitHub oswa imèl).
 2. **New project**: non `koze`, chwazi yon modpas pou baz done a (kenbe l pou ou), rejyon **East US** (pi pre Ayiti ak dyaspora a), plan **Free**.
 
-## 2. Kreye tab la ak fonksyon an
-*SQL Editor* → *New query* → kole epi **Run**, youn apre lòt:
-- [`migrations/0001_progress.sql`](migrations/0001_progress.sql): tab pwogrè a, ak RLS (chak moun wè pa l sèlman).
-- [`migrations/0002_delete_account.sql`](migrations/0002_delete_account.sql): pou moun nan ka efase kont li nèt (Pwofil → Efase kont mwen).
+## 2. Kreye tab yo (yon sèl fwa, 1 minit)
+*SQL Editor* → *New query* → kole **tout** [`setup-koze.sql`](setup-koze.sql) → **Run**. Ou ka kouri l plizyè fwa san pwoblèm.
+Li kreye:
+- `progress`: pwogrè chak kont (RLS: chak moun wè pa l sèlman; vizitè anonim pa gen aksè).
+- `delete_account()`: « Efase kont mwen ».
+- `events`: mezi anonim (app la ka sèlman ajoute; pèsonn pa ka li yo atravè API a).
+- `koze_private`: abònman rapèl yo ak kle VAPID yo (pa vizib atravè API a), fonksyon `push_save / push_touch / push_remove`.
+- Yon travay `pg_cron` chak èdtan (a :02) ki rele fonksyon `koze-push` la.
+
+## 2b. Fonksyon rapèl la (5 minit, yon sèl fwa)
+1. *Edge Functions* → *Deploy a new function* → **Via Editor**.
+2. Non: **`koze-push`** (egzakteman sa).
+3. Efase kòd egzanp lan, epi kole **tout** [`functions/koze-push/one-file.ts`](functions/koze-push/one-file.ts) → **Deploy**.
+4. Nan paj fonksyon an → *Details* (oswa *Settings*): **etenn « Enforce JWT verification »** (app la voye kle publishable la, pa yon JWT), epi **Save**.
+5. Teste: louvri `https://invbburpzbemmrphlouc.supabase.co/functions/v1/koze-push?key=1` nan navigatè a: li dwe montre `{"publicKey":"B..."}`.
+
+Pa gen kle pou kopye: fonksyon an kreye kle VAPID yo li menm la premye fwa, epi li li baz done a ak `SUPABASE_DB_URL` (Supabase bay li otomatikman). Si w chanje `index.ts` oswa `logic.js`, refè `one-file.ts` ak `node scripts/build-push-fn.mjs`.
+
+## 2c. Wè chif yo
+*SQL Editor*: kole youn nan rekèt [`stats.sql`](stats.sql) yo (moun chak jou, retansyon J1/J7/J30, kote moun yo kanpe, chak leson, mikwo pa platfòm, rapèl, telefòn).
 
 ## 3. Règ sekirite pou modpas yo (Dashboard)
 *Authentication* → *Sign In / Providers* → **Email**:

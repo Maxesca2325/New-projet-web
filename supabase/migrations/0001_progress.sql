@@ -26,3 +26,7 @@ create policy "progress_delete_own" on public.progress
 -- Limit pou yon moun pa ka mete yon gwo fichye nan tab la (pwogrè nòmal < 50 Ko).
 alter table public.progress drop constraint if exists progress_data_size;
 alter table public.progress add constraint progress_data_size check (pg_column_size(data) < 200000);
+
+-- Dwa yo, an klè: sèlman moun ki konekte (epi RLS limite yo a pwòp liy pa yo). Vizitè anonim pa gen aksè ditou.
+revoke all on public.progress from anon;
+grant select, insert, update, delete on public.progress to authenticated;

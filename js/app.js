@@ -8,6 +8,8 @@ import { SPRITE } from './icons.js';
 import { sfx, sfxOn, setSfx } from './sfx.js';
 import * as cloud from './cloud.js';
 import { PAGES } from './pages.js';
+import { track, flush, trackOn, setTrack } from './track.js';
+import * as remind from './remind.js';
 const oauthHash = cloud.grabOAuthHash(); // avan routeur la wè #access_token
 
 document.body.insertAdjacentHTML('afterbegin', SPRITE);
@@ -167,7 +169,7 @@ window.addEventListener('hashchange', async () => {
     const target = location.hash;
     history.pushState(null, '', session.hash);
     if (await ask('Ou vle kite? Pwogrè sa a ap pèdi.', 'Wi, kite', false, 'Kontinye')) {
-      stopSpeaking(); stopListening(); store.clearRun();
+      session.onQuit?.(); stopSpeaking(); stopListening(); store.clearRun();
       session = null;
       redirect(target || '#aprann');
     }
@@ -293,6 +295,7 @@ function setup(step) {
   const total = 4;
   const finish = () => {
     const first = !S.profile;
+    if (first) track('onboarding_done', { goal: draft.goal, level: draft.level, minutes: draft.minutes, paths: draft.paths.length });
     S.profile = draft;
     draft = null;
     save();
@@ -537,7 +540,9 @@ function profileTab() {
       <p class="note ${canSpeak ? 'ok' : ''}">${ic('volume-2')}<span>${canSpeak ? 'Vwa anglè a mache.' : 'Telefòn ou pa ka li fraz anglè yo byen fò. Eseye ak Chrome (Android) oswa Safari (iPhone).'}</span></p>
       <button class="switch" data-sfx role="switch" aria-checked="${sfxOn()}">${ic('volume-2')}<span>Son efè (bon/move repons)</span><b>${sfxOn() ? 'Wi' : 'Non'}</b></button>
       <p class="note ${canListen ? 'ok' : ''}">${ic('mic')}<span>${canListen ? 'Egzèsis pale yo mache.' : 'Egzèsis pale yo mache sèlman nan Chrome (Android) ak Safari (iPhone). Ou ka sote yo.'}</span></p>
+      <button class="switch" data-track role="switch" aria-checked="${trackOn()}">${ic('shield-check')}<span>Ede amelyore Koze (estatistik anonim)</span><b>${trackOn() ? 'Wi' : 'Non'}</b></button>
     </section>
+    ${reminderPanel()}
     ${cloud.cloudReady ? accountPanel() : ''}
     <section class="panel">
       <h2>Èd ak enfòmasyon</h2>
@@ -550,6 +555,15 @@ function profileTab() {
     <button class="quiet-link" data-reset>Efase tout pwogrè mwen</button>
     <p class="foot-note muted small">Koze v1.0 · ${cloud.currentUser() ? 'Pwogrè ou sove nan kont ou.' : 'Tout pwogrè ou rete sou telefòn ou.'}</p>`, { title: 'Pwofil' });
   $$('[data-edit]').forEach((a) => (a.onclick = () => { draft = null; }));
+  wireReminderPanel();
+  $('[data-track]').onclick = (e) => {
+    const on = !trackOn();
+    if (!on) track('track_off');
+    flush().finally(() => setTrack(on));
+    const b = e.currentTarget;
+    b.setAttribute('aria-checked', String(on));
+    b.querySelector('b').textContent = on ? 'Wi' : 'Non';
+  };
   $('[data-sfx]').onclick = (e) => {
     const on = !sfxOn();
     setSfx(on);
@@ -571,6 +585,68 @@ function profileTab() {
     toast(ok ? 'Pwogrè ou sove.' : 'Pa ka sove kounye a. Eseye ankò pita.');
     if (location.hash === '#pwofil') render();
   });
+}
+
+// ================================================================ rapèl chak jou
+
+const hourLabel = (h) => (h === 0 ? 'minwi' : h < 12 ? `${h}è maten` : h === 12 ? 'midi' : h < 18 ? `${h - 12}è apremidi` : `${h - 12}è aswè`);
+
+async function turnOnReminder(hour) {
+  const r = await remind.enable(hour, { lastDay: S.lastDay, streak: streakNow() });
+  track(r === 'ok' ? 'remind_on' : 'remind_fail', { hour, why: r });
+  return r;
+}
+
+function remindProblem(r) {
+  if (r === 'ios-install') return 'Sou iPhone, rapèl yo mache sèlman si Koze sou <b>ekran akèy</b> ou: nan Safari, peze bouton Pataje a (kare ak flèch), epi <b>« Sou ekran akèy »</b>. Apre sa, louvri Koze depi ekran akèy la.';
+  if (r === 'denied') return 'Notifikasyon yo bloke pou Koze. Pou limen yo: paramèt navigatè a → <b>Notifikasyon</b> → pèmèt pou sit Koze a.';
+  if (r === 'no') return 'Navigatè sa a pa ka resevwa rapèl. Eseye ak Chrome (Android) oswa mete Koze sou ekran akèy iPhone ou.';
+  return 'Nou pa rive limen rapèl la kounye a. Tcheke entènèt ou epi eseye ankò.';
+}
+
+function reminderPanel() {
+  const st = remind.pushStatus();
+  const r = remind.reminder();
+  const hour = r?.hour ?? 19;
+  const hours = Array.from({ length: 17 }, (_, i) => i + 6); // 6è maten → 10è aswè
+  return `
+    <section class="panel">
+      <h2>Rapèl chak jou</h2>
+      ${st === 'ok' || r ? `
+        <button class="switch" data-remind role="switch" aria-checked="${!!r}">${ic('calendar')}<span>Fè m sonje pratike</span><b>${r ? 'Wi' : 'Non'}</b></button>
+        <div class="remind-hour" ${r ? '' : 'hidden'}>
+          <label for="remind-hour">Lè rapèl la</label>
+          <select id="remind-hour">${hours.map((h) => `<option value="${h}" ${h === hour ? 'selected' : ''}>${hourLabel(h)}</option>`).join('')}</select>
+        </div>
+        <p class="muted small">Ou resevwa rapèl la sèlman si w poko pratike jou sa a.</p>
+        <p class="form-err remind-err" role="alert" aria-live="polite"></p>`
+      : `<p class="note">${ic('calendar')}<span>${remindProblem(st)}</span></p>`}
+    </section>`;
+}
+
+function wireReminderPanel() {
+  const sw = $('[data-remind]');
+  if (!sw) return;
+  const err = $('.remind-err');
+  sw.onclick = async () => {
+    sw.disabled = true;
+    err.textContent = '';
+    if (remind.reminder()) { await remind.disable(); track('remind_off'); }
+    else {
+      const r = await turnOnReminder(+$('#remind-hour').value || 19);
+      if (r !== 'ok') err.innerHTML = remindProblem(r);
+    }
+    const on = !!remind.reminder();
+    sw.disabled = false;
+    sw.setAttribute('aria-checked', String(on));
+    sw.querySelector('b').textContent = on ? 'Wi' : 'Non';
+    $('.remind-hour').hidden = !on;
+  };
+  $('#remind-hour').onchange = async (e) => {
+    if (!remind.reminder()) return;
+    const r = await turnOnReminder(+e.target.value);
+    toast(r === 'ok' ? `Rapèl la chanje: ${hourLabel(+e.target.value)}.` : 'Nou pa rive chanje lè a. Eseye ankò.');
+  };
 }
 
 // Retounen apre lyen imèl la oswa Google (paj nèf, oswa Koze ki te deja louvri).
@@ -750,6 +826,7 @@ function signupScreen() {
     if (!r.ok) { err(!r.len ? `Modpas la dwe gen omwen ${cloud.PW_MIN} karaktè.` : !r.mix ? 'Mete lèt ak chif nan modpas la.' : 'Modpas sa a twò fasil pou devine. Chwazi yon lòt.'); return $('#acct-pw').focus(); }
     if (!$('#acct-agree').checked) { err('Tcheke kare a pou w dakò ak kondisyon yo.'); return $('#acct-agree').focus(); }
     const res = await cloud.signUp(email, pw);
+    track('signup');
     if (res === 'session') return signedIn('Kont ou kreye.');
     checkEmailScreen('confirm', email);
   });
@@ -782,6 +859,7 @@ function loginScreen(email = lastEmail) {
       $('#acct-pw').select();
       throw x;
     }
+    track('login');
     await signedIn('Ou konekte.');
   });
 }
@@ -919,12 +997,14 @@ function savedRun(hash) {
 
 function startLesson(lesson, resume = null) {
   session = { hash: `#leson-${lesson.id}`, back: '#aprann', done: false };
+  track('lesson_start', { id: lesson.id, resume: !!resume });
   preload(lesson.items.map((it) => it.en));
   run({ kind: 'lesson', lesson, steps: resume ? resume.queue.map(deser) : buildLesson(lesson, S.profile), items: lesson.items, resume });
 }
 
 function startReview(resume = null) {
   session = { hash: '#revizyon', back: '#revize', done: false };
+  track('review_start', { resume: !!resume });
   const items = resume ? resume.itemIds.map((id) => ITEM.get(id)) : dueNow().slice(0, REVIEW_SIZE).map((id) => ITEM.get(id));
   preload(items.map((it) => it.en));
   run({ kind: 'review', steps: resume ? resume.queue.map(deser) : buildReview(items, S.items), items, resume });
@@ -938,6 +1018,8 @@ function run({ kind, lesson, steps, items, resume = null }) {
   let firstTries = resume?.firstTries ?? 0;
   let firstOk = resume?.firstOk ?? 0;
   const missed = new Set(resume?.missed ?? []);
+  const t0 = Date.now();
+  me.onQuit = () => track(kind === 'lesson' ? 'lesson_quit' : 'review_quit', { id: lesson?.id, pos, total: queue.length, type: queue[pos]?.type, secs: Math.round((Date.now() - t0) / 1000) });
   // Sonje kote moun nan ye, pou si l rafrechi paj la.
   const persist = () => store.saveRun({
     hash: me.hash, kind, itemIds: items.map((it) => it.id), pos, xp, firstTries, firstOk, missed: [...missed],
@@ -959,6 +1041,7 @@ function run({ kind, lesson, steps, items, resume = null }) {
     </main>`);
     $('[data-quit]').onclick = async () => {
       if (await ask('Ou vle kite? Pwogrè sa a ap pèdi.', 'Wi, kite', false, 'Kontinye')) {
+        me.onQuit();
         stopSpeaking();
         store.clearRun();
         session = null;
@@ -1192,13 +1275,15 @@ function run({ kind, lesson, steps, items, resume = null }) {
       rec = listen({ onInterim: (t) => heard(`<p class="listening">« ${esc(t)} »</p>`) });
       let alts = [];
       try { alts = await rec.done; } catch (e) {
+        track('speak_error', { code: String(e).slice(0, 30), id: item.id });
         heard(`<p class="mic-err">${MIC_ERR[e] || 'Mikwofòn nan pa mache kounye a. Eseye ankò, oswa kontinye san pale.'}</p>${techNote(e)}`);
         return reset();
       }
       reset();
-      if (!alts.length) return heard(`<p class="mic-err">${MIC_ERR['no-speech']}</p>${techNote('vid')}`);
+      if (!alts.length) { track('speak_error', { code: 'empty', id: item.id }); return heard(`<p class="mic-err">${MIC_ERR['no-speech']}</p>${techNote('vid')}`); }
       tries += 1;
       const m = spokenMatch(alts, item.en);
+      track('speak', { id: item.id, ok: m.score >= 0.6, score: Math.round(m.score * 100), try: tries });
       const colored = m.hits.length === m.words.length
         ? m.words.map((w, i) => `<span class="${m.hits[i] ? 'hit' : 'miss'}">${esc(w)}</span>`).join(' ')
         : esc(m.heard);
@@ -1241,6 +1326,9 @@ function run({ kind, lesson, steps, items, resume = null }) {
     me.done = true;
     const acc = firstTries ? Math.round((firstOk / firstTries) * 100) : 100;
     const offerAccount = cloud.cloudReady && !cloud.currentUser() && kind === 'lesson' && !localStorage.getItem('koze.offered');
+    const offerRemind = !offerAccount && remind.pushStatus() === 'ok' && !remind.reminder() && !localStorage.getItem('koze.remindAsked');
+    track(kind === 'lesson' ? 'lesson_done' : 'review_done', { id: lesson?.id, acc, xp, n: items.length, missed: missed.size, secs: Math.round((Date.now() - t0) / 1000), streak: S.streak });
+    remind.touch(store.dayKey(), S.streak);
     sync();
     const extra = [
       goalReached ? `<li>${ic('target')} Ou rive nan objektif ou jodi a!</li>` : '',
@@ -1261,6 +1349,10 @@ function run({ kind, lesson, steps, items, resume = null }) {
         <p><b>Pa pèdi pwogrè ou.</b> Kreye yon kont gratis ak imèl ou, epi kontinye sou nenpòt telefòn.</p>
         <div class="row"><a class="btn secondary" href="#kont" data-offer>Kreye yon kont</a><button class="btn ghost" data-later>Pita</button></div>
       </section>` : ''}
+      ${offerRemind ? `<section class="save-offer">
+        <p><b>Fè m sonje chak jou?</b> Yon ti rapèl a 7è aswè, sèlman si w poko pratike jou sa a.</p>
+        <div class="row"><button class="btn secondary" data-remind-yes>${ic('calendar')} Wi, a 7è aswè</button><button class="btn ghost" data-remind-later>Pita</button></div>
+      </section>` : ''}
       ${extra ? `<ul class="wins">${extra}</ul>` : ''}
       <div class="grow"></div>
       <div class="sticky-foot"><button class="btn primary big" data-home>Kontinye</button></div>
@@ -1273,6 +1365,15 @@ function run({ kind, lesson, steps, items, resume = null }) {
     btn.onclick = () => { session = null; redirect(me.back); };
     $('[data-later]')?.addEventListener('click', (e) => { try { localStorage.setItem('koze.offered', '1'); } catch { /* */ } e.currentTarget.closest('.save-offer').remove(); });
     $('[data-offer]')?.addEventListener('click', () => { try { localStorage.setItem('koze.offered', '1'); } catch { /* */ } session = null; });
+    const asked = () => { try { localStorage.setItem('koze.remindAsked', '1'); } catch { /* */ } };
+    $('[data-remind-later]')?.addEventListener('click', (e) => { asked(); track('remind_later'); e.currentTarget.closest('.save-offer').remove(); });
+    $('[data-remind-yes]')?.addEventListener('click', async (e) => {
+      asked();
+      const card = e.currentTarget.closest('.save-offer');
+      e.currentTarget.disabled = true;
+      const r = await turnOnReminder(19);
+      card.innerHTML = `<p>${r === 'ok' ? '<b>Rapèl la limen.</b> Ou ka chanje lè a nan Pwofil.' : remindProblem(r)}</p>`;
+    });
   }
 
   next();
@@ -1319,8 +1420,13 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
   navigator.serviceWorker.register('sw.js').then((r) => r.update()).catch(() => {});
 }
 
+const fromPush = new URLSearchParams(location.search).get('src') === 'push';
+if (fromPush) history.replaceState(null, '', location.pathname + (DEBUG ? '?debug' : '') + location.hash);
+track('open', { route: (location.hash.split('-')[0] || '#').slice(0, 20), push: fromPush, streak: streakNow(), lessons: Object.keys(S.done).length, account: !!cloud.currentUser(), remind: !!remind.reminder() });
 render();
 booting = false;
+window.addEventListener('appinstalled', () => track('installed'));
+setTimeout(flush, 2000);
 
 // Kont: retounen apre Google, epi senkronize an aryè plan.
 (async () => {

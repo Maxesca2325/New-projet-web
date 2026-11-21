@@ -3,7 +3,7 @@
 // (piblisite, peman, nouvo sèvis), mete paj sa yo ajou epi chanje UPDATED.
 import { CONTACT_EMAIL } from './config.js';
 
-export const UPDATED = '16 novanm 2026';
+export const UPDATED = '21 novanm 2026';
 const contact = () => (CONTACT_EMAIL
   ? `ekri nou nan <a href="mailto:${CONTACT_EMAIL}" translate="no">${CONTACT_EMAIL}</a>`
   : 'kontakte nou (adrès imèl la ap parèt isit la byento)');
@@ -19,6 +19,7 @@ export const PAGES = {
       ${q('Èske m bezwen kreye yon kont?', '<p>Non. Ou ka aprann san kont: pwogrè ou rete sou telefòn ou. Yon kont pèmèt ou pa pèdi pwogrè ou si w chanje telefòn, epi aprann sou plizyè aparèy.</p>')}
       ${q('Èske Koze mache san entènèt?', '<p>Wi. Apre premye fwa ou louvri l, leson yo ak vwa yo mache san entènèt. Pwogrè ou ap sove nan kont ou lè entènèt la tounen.</p>')}
       ${q('Kijan pou m mete Koze sou ekran telefòn mwen?', '<p><b>Android (Chrome):</b> peze ⋮ anlè a dwat, epi <i>Ajoute nan ekran akèy</i> (<span lang="en" translate="no">Add to Home screen</span>).</p><p><b>iPhone (Safari):</b> peze bouton pataje a (kare ak flèch), epi <i>Sou ekran akèy</i> (<span lang="en" translate="no">Add to Home Screen</span>).</p>')}
+      ${q('Kijan pou m resevwa yon rapèl chak jou?', '<p>Pwofil → <i>Rapèl chak jou</i>: limen l epi chwazi lè a. Ou resevwa l sèlman si w poko pratike jou sa a.</p><p><b>iPhone:</b> rapèl yo mache sèlman si Koze sou ekran akèy ou (Safari → bouton Pataje → <i>Sou ekran akèy</i>), epi ou louvri l depi la.</p>')}
       ${q('Kijan revizyon yo mache?', '<p>Chak fraz ou aprann tounen nan bon moman an: kèk jou apre, pi lwen chak fwa ou konnen l. Si w bliye l, li tounen pi vit. Se konsa w ap sonje l pou lontan.</p>')}
       <h2 class="faq-h">Son ak mikwo</h2>
       ${q('Mwen pa tande vwa a', '<p>Monte volim telefòn nan. Sou iPhone, tcheke bouton silans lan sou kote a. Si sa pa mache toujou, fèmen Koze epi louvri l ankò.</p>')}
@@ -49,25 +50,30 @@ export const PAGES = {
       </ul>
       <h2>3. Mikwo ak vwa</h2>
       <p>Koze pa anrejistre ni sere vwa ou. Pou egzèsis pale yo, se navigatè telefòn ou (Chrome/Google oswa Safari/Apple) ki tande epi ekri sa w di a, dapre pwòp règ konfidansyalite pa yo. Koze resevwa sèlman tèks la pou l tcheke repons ou.</p>
-      <h2>4. Kiyès ki ede nou</h2>
+      <h2>4. Estatistik anonim</h2>
+      <p>Pou nou konnen kote moun yo bloke epi amelyore leson yo, Koze voye ti enfòmasyon anonim: lè app la louvri, lè yon leson kòmanse, fini oswa kanpe, presizyon ou, si mikwo a mache, si rapèl yo limen. Chak telefòn gen yon nimewo o aza, ki pa lye ak imèl ou ni ak kont ou. Nou pa voye sa w ekri, sa w di nan mikwo a, ni pozisyon ou.</p>
+      <p>Ou ka etenn sa nenpòt lè: Pwofil → <i>Ede amelyore Koze</i>.</p>
+      <h2>5. Rapèl chak jou</h2>
+      <p>Si w limen rapèl yo, telefòn ou ba nou yon adrès notifikasyon (navigatè a kreye l), lè w chwazi a, zòn lè ou, ak dènye jou ou te pratike, pou nou voye rapèl la sèlman si w poko pratike. Etenn rapèl yo nan Pwofil efase adrès sa a.</p>
+      <h2>6. Kiyès ki ede nou</h2>
       <ul>
         <li><b>Supabase</b> (Etazini): kenbe kont yo ak pwogrè yo, sou sèvè ki pwoteje.</li>
         <li><b>GitHub Pages</b>: mete app la sou entènèt. Yo ka kenbe adrès IP vizitè yo pou sekirite.</li>
       </ul>
       <p>Nou pa vann, pa lwe, epi pa pataje done ou ak lòt moun pou piblisite. Nou ta bay done sèlman si lalwa oblije nou.</p>
-      <h2>5. Sekirite</h2>
+      <h2>7. Sekirite</h2>
       <p>Tout koneksyon chifre (HTTPS). Chak moun ka wè sèlman pwòp pwogrè pa l (règ sekirite nan baz done a). Sesyon yo ekspire poukont yo, epi twòp move modpas bloke koneksyon an pou yon ti tan.</p>
-      <h2>6. Dwa ou</h2>
+      <h2>8. Dwa ou</h2>
       <ul>
         <li><b>Wè ak korije</b>: pwogrè ou ak imèl ou parèt nan Pwofil.</li>
         <li><b>Efase</b>: Pwofil → <i>Efase kont mwen</i> efase kont ou ak tout pwogrè ladan l nèt, touswit.</li>
         <li><b>Kite</b>: dekonekte nenpòt lè; pwogrè sou telefòn ou rete pou ou.</li>
       </ul>
-      <h2>7. Timoun</h2>
+      <h2>9. Timoun</h2>
       <p>Pou kreye yon kont, ou dwe gen omwen 13 an. Timoun ki pi piti ka aprann san kont, avèk paran yo.</p>
-      <h2>8. Chanjman</h2>
+      <h2>10. Chanjman</h2>
       <p>Si yon jou nou chanje kijan nou sèvi ak done ou (pa egzanp piblisite oswa abònman), n ap mete paj sa a ajou epi n ap avèti w nan app la anvan.</p>
-      <h2>9. Kontak</h2>
+      <h2>11. Kontak</h2>
       <p>Pou nenpòt kesyon sou done ou, ${contact()}.</p>`,
   },
 
