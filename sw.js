@@ -4,15 +4,15 @@
 // - Medya yo (odyo, imaj, polis): kopi a an premye, nan yon cache ki pa efase
 //   lè app la mete ajou, pou moun nan pa telechaje vwa yo ankò.
 // Chanje VERSION chak fwa ou pibliye yon nouvo vèsyon.
-const VERSION = 'koze-v25';
-const MEDIA = 'koze-media-v2';
+const VERSION = 'koze-v26';
+const MEDIA = 'koze-media-v3';
 const ASSETS = [
   './', './index.html', './tokens.css', './styles.css', './manifest.webmanifest',
   './js/app.js', './js/icons.js', './js/sfx.js', './js/audio.js', './js/cloud.js', './js/config.js', './js/pages.js', './js/data.js', './js/lesson.js', './js/srs.js', './js/speech.js', './js/store.js', './js/util.js',
   './audio/index.json',
 ];
 const MEDIA_ASSETS = [
-  './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png',
+  './icons/favicon.png', './icons/apple-touch-icon.png', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './img/logo.webp',
   './img/maskot.webp', './img/maskot-kontan.webp', './img/maskot-ankouraje.webp', './img/maskot-dodo.webp',
   './fonts/nunito.woff2',
 ];

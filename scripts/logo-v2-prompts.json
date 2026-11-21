@@ -1,0 +1,18 @@
+[
+  {
+    "name": "logo-a-bubble",
+    "n": 2,
+    "prompt": "Flat vector app icon for 'Koze', a language learning app for Haitian adults. A single soft rounded-square speech bubble in royal blue (#2357D9) with a short tail at the bottom left. Inside, a bold rounded white lowercase letter 'k', perfectly centered. One small coral-red (#D0193F) circle sits at the top right of the k, like a dot of conversation. Flat solid colors only, no gradient, no shadow, no outline, no other text. Centered on a plain pure white background with generous margins. Modern, calm, premium brand mark, same craft level as Busuu or Babbel icons, readable at 32 pixels."
+  },
+  {
+    "name": "logo-b-two-bubbles",
+    "n": 2,
+    "prompt": "Flat vector logo mark for 'Koze', an app that teaches English in Haitian Creole. Two overlapping rounded speech bubbles facing each other, symbolizing a conversation between two languages: the left bubble royal blue (#2357D9), the right bubble coral red (#D0193F), where they overlap the shape becomes deep navy (#1B2230). The negative space between them subtly forms a lowercase letter 'k'. Geometric, simple, balanced, flat solid colors, no gradient, no shadow, no text. Centered on a plain pure white background, generous margins, premium app icon quality, readable at small sizes."
+  },
+  {
+    "name": "logo-c-wordmark",
+    "n": 2,
+    "aspect_ratio": "16:9",
+    "prompt": "Clean wordmark logo for the language learning app 'koze', written in lowercase with a friendly rounded geometric sans-serif typeface, bold weight, letters in deep navy (#1B2230). The letter 'o' is replaced by a small royal blue (#2357D9) round speech bubble with a tiny tail. Exactly the four letters k o z e, correctly spelled, nothing else. Flat solid colors, no gradient, no shadow, no tagline, no other text. Centered on a plain pure white background with generous margins, premium brand quality."
+  }
+]

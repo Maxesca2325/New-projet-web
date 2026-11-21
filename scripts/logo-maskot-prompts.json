@@ -1,0 +1,15 @@
+[
+  {
+    "name": "logo-m2-badge",
+    "n": 2,
+    "assets": ["img/maskot.webp"],
+    "prompt": "App icon for 'Koze', a language learning app. A rounded-square icon with a solid royal blue (#2357D9) background. In front, the bird from the reference image (a Hispaniolan trogon: emerald green head, grey chest, red belly, big friendly eyes) shown from the chest up, smiling, with one small white speech bubble next to its head. Simplified flat vector illustration, clean shapes, flat colors, no gradient, no shadow, no text. The rounded square centered on a plain pure white background with margins. Premium, calm, recognisable at 48 pixels."
+  },
+  {
+    "name": "logo-m3-lockup",
+    "n": 2,
+    "aspect_ratio": "16:9",
+    "assets": ["img/maskot.webp"],
+    "prompt": "Horizontal logo lockup for the app 'koze'. On the left, a small simplified flat head of the bird from the reference image (Hispaniolan trogon: emerald green, red belly, big friendly eyes) inside a royal blue (#2357D9) round speech bubble. On the right, the word 'koze' in lowercase, bold rounded geometric sans-serif, deep navy (#1B2230), exactly the four letters k o z e. Flat vector, flat colors, no gradient, no shadow, no other text. Centered on plain pure white background, generous margins."
+  }
+]

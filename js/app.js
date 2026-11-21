@@ -15,7 +15,8 @@ document.body.insertAdjacentHTML('afterbegin', SPRITE);
 // ================================================================ ti zouti
 
 const ic = (name, cls = '') => `<svg class="ic ${cls}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
-const LOGO = `<svg viewBox="0 0 64 64" aria-hidden="true"><defs><clipPath id="kz-b"><path d="M14 8h36a10 10 0 0 1 10 10v22a10 10 0 0 1-10 10H30l-12 10v-10h-4A10 10 0 0 1 4 40V18A10 10 0 0 1 14 8z"/></clipPath></defs><g clip-path="url(#kz-b)"><rect width="64" height="29" fill="#0b2bb8"/><rect y="29" width="64" height="35" fill="#d21034"/></g><path d="M25 18v22M25 31l11-11M28.5 28l8.5 12" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
+// Logo: ti zwazo Koze a (trogon) nan yon kare ble (fèt ak ai33 Imagen 3, scripts/logo-maskot-prompts.json).
+const LOGO = '<img class="logo-img" src="img/logo.webp" width="96" height="96" alt="" decoding="async">';
 const wordmark = (big = false) => `<span class="wordmark ${big ? 'big' : ''}" translate="no">${LOGO}<span>koze</span></span>`;
 const ptile = (p, cls = '') => `<span class="ptile t-${p.ton} ${cls}">${ic(p.ikon, 'lg')}</span>`;
 const MASKOT = {

@@ -46,9 +46,9 @@ a { color: var(--color-text-link); }
 
 /* ---------- logo ---------- */
 .wordmark { display: inline-flex; align-items: center; gap: var(--space-2); font-family: var(--font-family-display); font-weight: var(--font-weight-black); font-size: var(--font-size-lg); letter-spacing: -0.02em; color: var(--color-text-primary); }
-.wordmark svg { width: 32px; height: 32px; }
+.wordmark .logo-img, .wordmark svg { display: block; width: 32px; height: 32px; }
 .wordmark.big { font-size: var(--font-size-2xl); gap: var(--space-2); }
-.wordmark.big svg { width: 40px; height: 40px; }
+.wordmark.big .logo-img, .wordmark.big svg { width: 40px; height: 40px; }
 
 /* ---------- buttons ---------- */
 button { font: inherit; color: inherit; cursor: pointer; }
@@ -459,7 +459,7 @@ a.lesson:active .lt, .link-list a:active span { color: var(--color-accent-primar
 /* ---------- vrè paj konekte / kreye kont ---------- */
 .auth { gap: 0; padding-bottom: var(--space-4); }
 .auth-head { display: grid; justify-items: center; gap: var(--space-1); margin: var(--space-2) 0 var(--space-5); text-align: center; }
-.auth-logo svg { display: block; width: 40px; height: 40px; margin-bottom: var(--space-2); }
+.auth-logo .logo-img { display: block; width: 56px; height: 56px; margin-bottom: var(--space-2); }
 .auth-head h1 { font-size: var(--font-size-2xl); }
 .auth-head p { max-width: 30ch; color: var(--color-text-secondary); font-size: var(--font-size-sm); }
 .auth-card { padding: var(--space-5) var(--space-4) var(--space-4); background: var(--color-bg-secondary); border: var(--border-width) solid var(--color-border-primary); border-radius: var(--border-radius-lg); }
